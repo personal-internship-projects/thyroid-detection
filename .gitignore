@@ -1,0 +1,4 @@
+src/dataset/*
+!src/dataset/batches_of_data/
+__pycache__/
+src/logs/*
