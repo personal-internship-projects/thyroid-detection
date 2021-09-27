@@ -17,7 +17,7 @@ class CassandraOperations:
             cloud_config= {
                 'secure_connect_bundle': 'G:\\Ineuron\\secure-connect-test.zip'
             }
-            auth_provider = PlainTextAuthProvider('djMBOJUicLZEvpHTGZFRxDBI', 'WCYx-3FA+gBijXY.YqKWUbMnLh8Wg2bS5ZPuUU8ex4Hzlh6IhmZZbtT81ZAOxNYy_ld5HhT.D76SfBtSfph6ZMeXWZm50ozHjic2A-Dihriicj2nQcOe0.-,fKt1AfY4')
+            auth_provider = PlainTextAuthProvider('id', 'key')
             cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
             session = cluster.connect()
             autolog("Connection started sucessfully.")
