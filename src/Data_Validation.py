@@ -123,14 +123,16 @@ class Data_Validation :
         for files in os.listdir(self.finalCsvTrain):
             data = read_csv(f"{self.finalCsvTrain}/{files}")
             print(files)
-            column = ['sex', 'on_thyroxine', 'query_on_thyroxine', 'on_antithyroid_medication', 'sick', 'pregnant',
-                           'thyroid_surgery', 'I131_treatment', 'query_hypothyroid', 'query_hyperthyroid', 'lithium',
-                           'goitre', 'tumor', 'hypopituitary', 'psych', 'TSH_measured', 'T3_measured', 'TT4_measured',
-                           'T4U_measured', 'FTI_measured', 'TBG_measured', 'TBG', 'referral_source', 'Class']
+            column = ['sex', 'on thyroxine', 'query on thyroxine', 'on antithyroid medication', 'sick', 'pregnant',
+                           'thyroid surgery', 'I131 treatment', 'query hypothyroid', 'query hyperthyroid', 'lithium',
+                           'goitre', 'tumor', 'hypopituitary', 'psych', 'TSH measured', 'T3 measured', 'TT4 measured',
+                           'T4U measured', 'FTI measured', 'TBG measured', 'TBG', 'referral source', 'Class']
+            
             for col in data.columns:
                 if col in column:
                     data[col] = data[col].apply(lambda x: f"'{str(x)}'")
-                if col not in column:
+                    count += 1
+                elif col not in column:
                     data[col] = data[col].replace('?', "'?'")
                     
             os.remove(f"{self.finalCsvTrain}/{files}")
