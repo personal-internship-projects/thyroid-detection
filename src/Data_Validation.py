@@ -131,7 +131,6 @@ class Data_Validation :
             for col in data.columns:
                 if col in column:
                     data[col] = data[col].apply(lambda x: f"'{str(x)}'")
-                    count += 1
                 elif col not in column:
                     data[col] = data[col].replace('?', "'?'")
                     
