@@ -29,7 +29,7 @@ class File_Type_Validation:
             if i.endswith(file_extensions):
                 new_name = f"{self.goodCsvPath}/{i}.csv"
                 shutil.copy(f"{raw_files}/{i}", self.goodCsvPath)
-                os.rename(f"{self.goodCsvPath}/{i}", new_name)
+                shutil.move(f"{self.goodCsvPath}/{i}", new_name)
                 autolog(f"Copying and renaming {i} to {self.goodCsvPath} ...")
 
             else:

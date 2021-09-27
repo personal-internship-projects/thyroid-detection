@@ -116,3 +116,27 @@ class Data_Validation :
                 csv.to_csv(f"{self.finalCsvTest}/{files}", index=None, header=True)
 
         autolog("Done.")
+
+
+    def addquotestostring(self):
+        autolog("Adding quotes to strings in dataset started...")
+        for files in os.listdir(self.finalCsvTrain):
+            data = read_csv(f"{self.finalCsvTrain}/{files}")
+            print(files)
+            column = ['sex', 'on_thyroxine', 'query_on_thyroxine', 'on_antithyroid_medication', 'sick', 'pregnant',
+                           'thyroid_surgery', 'I131_treatment', 'query_hypothyroid', 'query_hyperthyroid', 'lithium',
+                           'goitre', 'tumor', 'hypopituitary', 'psych', 'TSH_measured', 'T3_measured', 'TT4_measured',
+                           'T4U_measured', 'FTI_measured', 'TBG_measured', 'TBG', 'referral_source', 'Class']
+            for col in data.columns:
+                if col in column:
+                    data[col] = data[col].apply(lambda x: f"'{str(x)}'")
+                if col not in column:
+                    data[col] = data[col].replace('?', "'?'")
+                    
+            os.remove(f"{self.finalCsvTrain}/{files}")
+            data.to_csv(f"{self.finalCsvTrain}/{files}",index=None, header=True)
+            
+            autolog(f"added quotes {files}.csv completed. ")
+
+
+
