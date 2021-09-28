@@ -8,6 +8,7 @@ import re
 class Data_Validation :
     def __init__(self) -> None:
        self.schema_path = 'src/schema_training.json' 
+       self.finalCsv =  "src/dataset/final_csv"
        self.finalCsvTest =  "src/dataset/final_csv/test"
        self.finalCsvTrain = "src/dataset/final_csv/train"
        self.goodCsvPath = "./src/dataset/csv_operation/GoodCSV"
@@ -42,7 +43,7 @@ class Data_Validation :
         except Exception as e:
             autolog("Error: " + e)
             raise e
-        return column_names, NumberOfColumns
+        return column_names, NumberOfColumns,dic
 
 
     def validateColumnLength(self, NumberOfColumns):
@@ -118,26 +119,26 @@ class Data_Validation :
         autolog("Done.")
 
 
-    def addquotestostring(self):
+    def addquotestostring(self,dict):
         autolog("Adding quotes to strings in dataset started...")
-        for files in os.listdir(self.finalCsvTrain):
-            data = read_csv(f"{self.finalCsvTrain}/{files}")
-            print(files)
-            column = ['sex', 'on thyroxine', 'query on thyroxine', 'on antithyroid medication', 'sick', 'pregnant',
-                           'thyroid surgery', 'I131 treatment', 'query hypothyroid', 'query hyperthyroid', 'lithium',
-                           'goitre', 'tumor', 'hypopituitary', 'psych', 'TSH measured', 'T3 measured', 'TT4 measured',
-                           'T4U measured', 'FTI measured', 'TBG measured', 'TBG', 'referral source', 'Class']
-            
-            for col in data.columns:
-                if col in column:
-                    data[col] = data[col].apply(lambda x: f"'{str(x)}'")
-                elif col not in column:
-                    data[col] = data[col].replace('?', "'?'")
-                    
-            os.remove(f"{self.finalCsvTrain}/{files}")
-            data.to_csv(f"{self.finalCsvTrain}/{files}",index=None, header=True)
-            
-            autolog(f"added quotes {files}.csv completed. ")
+        for x in os.listdir(self.finalCsv):
+            mainDir = f"{self.finalCsv}/{x}"
+            for files in os.listdir(mainDir):
+                data = read_csv(f"{mainDir}/{files}")
+                #print(files)
+
+                column =  [x for x in dict["ColName"] if dict["ColName"][x] == "varchar"]
+                
+                for col in data.columns:
+                    if col in column:
+                        data[col] = data[col].apply(lambda x: f"'{str(x)}'")
+                    elif col not in column:
+                        data[col] = data[col].replace('?', "'?'")
+                        
+                os.remove(f"{mainDir}/{files}")
+                data.to_csv(f"{mainDir}/{files}",index=None, header=True)
+                
+                autolog(f"added quotes {files}.csv completed. ")
 
 
 
