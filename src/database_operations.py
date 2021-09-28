@@ -40,7 +40,7 @@ class CassandraOperations:
     
 
 
-    def create_table(self,keyspace_name,table_name):
+    def createTable(self, keyspace_name, table_name):
         autolog("Function Started")
         column_dict = self.schemaParser()
         for column_name in column_dict.keys():
@@ -57,7 +57,7 @@ class CassandraOperations:
                     self.session.execute(f"CREATE TABLE  {keyspace_name}.{table_name} (id int PRIMARY KEY, {column_name} {datatype_of_columns})")
                     autolog(f"TABLE {table_name} created.")
                 except :
-                    pass
+                    autolog("Failed to create table {table_name}")
                 
 
 

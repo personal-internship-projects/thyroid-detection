@@ -5,7 +5,7 @@ from src.logger.auto_logger import autolog
 from pandas import read_csv, DataFrame
 import re
 
-class Data_Validation :
+class DataValidation :
     def __init__(self) -> None:
        self.schema_path = 'src/schema_training.json' 
        self.finalCsv =  "src/dataset/final_csv"
@@ -119,7 +119,7 @@ class Data_Validation :
         autolog("Done.")
 
 
-    def addquotestostring(self,dict):
+    def addQuotesToString(self, dict):
         autolog("Adding quotes to strings in dataset started...")
         for x in os.listdir(self.finalCsv):
             mainDir = f"{self.finalCsv}/{x}"
