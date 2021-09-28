@@ -1,5 +1,6 @@
 import src.File_Type_Validation as fv
 import src.Data_Validation as dv
+import src.database_operations as dboc 
 x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
@@ -11,3 +12,6 @@ b = zz.validateMissingValuesInWholeColumn()
 d= zz.getColumnName()
 e=zz.addColumnNames(d)
 f = zz.addquotestostring(dic)
+db = dboc.CassandraOperations()
+db.databaseConnection()
+db.create_table('ineuron','test')
