@@ -4,7 +4,7 @@ import src.database_operations as dboc
 x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
-zz =dv.Data_Validation()
+zz =dv.DataValidation()
 zz.makeFinalCsvDirectory()
 z,g,dic = zz.verifyingSchema()
 a= zz.validateColumnLength(g)
