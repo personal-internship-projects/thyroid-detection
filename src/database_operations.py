@@ -11,6 +11,19 @@ class CassandraOperations:
         self.goodCsvPath    =  "./src/dataset/csv_operation/GoodCSV"
         self.badCsvPath     =  "./src/dataset/csv_operation/BadCSV"
 
+    
+    def schemaParser(self):
+        dic = dict()
+        try:
+            with open(self.schema_path, 'r') as f:
+                dic = json.load(f)
+                f.close()
+        except Exception as e:
+            autolog("Error: " + e)
+            raise e
+        return dic
+
+
     def databaseconnection(self):
         try:
             autolog("Trying to initialize Connection...")
@@ -24,3 +37,10 @@ class CassandraOperations:
         except ConnectionError:
             autolog("Error while connecting to database.")
         return session
+    
+
+
+    def create_table(self,keyspace_name):
+        
+
+
