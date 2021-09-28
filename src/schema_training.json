@@ -1,7 +1,7 @@
 {
     "NumberOfColumns" : 30,
     "ColName": {
-        "age" : "Integer",
+        "age" : "int",
         "sex" : "varchar",
         "on thyroxine" : "varchar",
         "query on thyroxine" : "varchar",
