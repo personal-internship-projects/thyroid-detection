@@ -71,16 +71,19 @@ class CassandraOperations:
         lst_dict = [x for x in scheme_dict]
         lst = ' '.join([str(elem)+"," for elem in lst_dict])
         lst = lst[:-1]
+        count = 0
+
         for files in listdir(path):
             with open (f"{path}/{files}", "r") as csv_file:
                 next(csv_file)
                 reader = csv.reader(csv_file, delimiter="\n")
+                xx = enumerate(reader)
                 for rows in enumerate(reader):  
                     for words in rows[1]:
-                        query = f"INSERT INTO {self.keyspace_name}.{table_name} ({lst}) VALUES ({words})"
+                        query = f"INSERT INTO {self.keyspace_name}.{table_name} (id,{lst}) VALUES ({count},{words})"
                         print(query)
                         self.session.execute(query)
-
+                        count += 1
     
                 
 
