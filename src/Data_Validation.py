@@ -88,9 +88,11 @@ class DataValidation :
 
             with open(f"{self.badCsvPath}/{files}") as f:
                 for lines in f:
-                    labels = re.match("(.+):", lines)
-                    if labels:
-                        lst.append(labels.group(1))
+                    labels_raw = re.match("(.+):", lines)
+                    if labels_raw:
+                        labels = labels_raw.group(1).replace(" ","_").lower()
+                        lst.append(labels)
+                        print(labels)
                 lst.append('Class')
             break
 
