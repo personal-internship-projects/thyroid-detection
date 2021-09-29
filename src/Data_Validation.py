@@ -1,4 +1,6 @@
 import os, shutil
+
+from numpy import NaN
 import src.File_Type_Validation as fv
 import json
 from src.logger.auto_logger import autolog
@@ -92,8 +94,8 @@ class DataValidation :
                     if labels_raw:
                         labels = labels_raw.group(1).replace(" ","_").lower()
                         lst.append(labels)
-                        print(labels)
-                lst.append('Class')
+                        
+                lst.append('class')
             break
 
         return lst
@@ -135,7 +137,7 @@ class DataValidation :
                     if col in column:
                         data[col] = data[col].apply(lambda x: f"'{str(x)}'")
                     elif col not in column:
-                        data[col] = data[col].replace('?', "'?'")
+                        data[col] = data[col].replace('?', "null")
                         
                 os.remove(f"{mainDir}/{files}")
                 data.to_csv(f"{mainDir}/{files}",index=None, header=True)
