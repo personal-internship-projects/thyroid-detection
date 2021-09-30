@@ -121,7 +121,8 @@ class DataValidation :
                 csv.to_csv(f"{self.finalCsvTest}/{files}", index=None, header=True)
 
         autolog("Done.")
-
+    
+    
 
     def addQuotesToString(self, dict):
         autolog("Adding quotes to strings in dataset started...")
@@ -129,7 +130,7 @@ class DataValidation :
             mainDir = f"{self.finalCsv}/{x}"
             for files in os.listdir(mainDir):
                 data = read_csv(f"{mainDir}/{files}")
-                #print(files)
+                data.iloc[: , -1] = data.iloc[: , -1].apply(lambda x: re.match(r'(\w+|)',x).group(1))
 
                 column =  [x for x in dict["ColName"] if dict["ColName"][x] == "varchar"]
                 
