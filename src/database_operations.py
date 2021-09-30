@@ -77,13 +77,53 @@ class CassandraOperations:
             with open (f"{path}/{files}", "r") as csv_file:
                 next(csv_file)
                 reader = csv.reader(csv_file, delimiter="\n")
-                xx = enumerate(reader)
-                for rows in enumerate(reader):  
+                BATCH_STMT = 'BEGIN BATCH '
+                batch_size = 0
+                for rows in enumerate(reader):
                     for words in rows[1]:
                         query = f"INSERT INTO {self.keyspace_name}.{table_name} (id,{lst}) VALUES ({count},{words})"
                         print(query)
                         self.session.execute(query)
                         count += 1
+                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+                        '''if batch_size <= 500:
+                            query = f"INSERT INTO {self.keyspace_name}.{table_name} (id,{lst}) VALUES ({count},{words});"
+                            BATCH_STMT += query
+                            batch_size += 1
+                        else:
+                            BATCH_STMT += ' APPLY BATCH;'
+                            self.session.execute(BATCH_STMT)
+                            print(BATCH_STMT)
+                            batch_size = 0
+                        count += 1
+                    if count == 3:
+                        break
+                if batch_size != 0:
+                    BATCH_STMT += ' APPLY BATCH;'
+                    self.session.execute(BATCH_STMT)
+                    print(BATCH_STMT)
+                    batch_size = 0'''
+
+
     
                 
 
