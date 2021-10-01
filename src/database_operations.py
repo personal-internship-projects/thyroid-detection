@@ -71,38 +71,39 @@ class CassandraOperations:
         lst_dict = [x for x in scheme_dict]
         lst = ' '.join([str(elem)+"," for elem in lst_dict])
         lst = lst[:-1]
-        count = 1
-
-        for files in listdir(path):
-            with open (f"{path}/{files}", "r") as csv_file:
-                next(csv_file)
-                reader = csv.reader(csv_file, delimiter="\n")
-                BATCH_STMT = 'BEGIN BATCH '
-                batch_size = 0
-                for rows in enumerate(reader):
-                    for words in rows[1]:
-                        
-                        if batch_size <= 500:
-                            query = f"INSERT INTO {self.keyspace_name}.{table_name} (id,{lst}) VALUES ({count},{words});"
-                            BATCH_STMT += query
-                            batch_size += 1
+        try:
+            count = self.session.execute(f"SELECT COUNT(*) FROM {self.keyspace_name}.{table_name};")
+            count = count[0].count
+            
+            for files in listdir(path):
+                with open (f"{path}/{files}", "r") as csv_file:
+                    next(csv_file)
+                    reader = csv.reader(csv_file, delimiter="\n")
+                    BATCH_STMT = 'BEGIN BATCH '
+                    batch_size = 0
+                    for rows in enumerate(reader):
+                        for words in rows[1]:
+                            
+                            if batch_size <= 500:
+                                query = f"INSERT INTO {self.keyspace_name}.{table_name} (id,{lst}) VALUES ({count},{words});"
+                                BATCH_STMT += query
+                                batch_size += 1 
+                            else:
+                                BATCH_STMT += ' APPLY BATCH;'
+                                self.session.execute(BATCH_STMT)
+                                print(BATCH_STMT)
+                                BATCH_STMT = "BEGIN BATCH "
+                                batch_size = 0
                             count += 1
-                        else:
-                            BATCH_STMT += ' APPLY BATCH;'
-                            self.session.execute(BATCH_STMT)
-                            print(BATCH_STMT)
-                            BATCH_STMT = "BEGIN BATCH "
-                            batch_size = 0
-                        
-                if batch_size != 0:
-                    BATCH_STMT += ' APPLY BATCH;'
-                    self.session.execute(BATCH_STMT)
-                    print(BATCH_STMT)
-                    batch_size = 0 
-
-
-    
-                
+                    if batch_size != 0:
+                        BATCH_STMT += ' APPLY BATCH;'
+                        self.session.execute(BATCH_STMT)
+                        print(BATCH_STMT)
+                        batch_size = 0 
+        except Exception as e:
+            autolog("Failed to insert data" + e.text,3)
+        
 
 
 
+            
