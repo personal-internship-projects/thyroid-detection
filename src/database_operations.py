@@ -1,10 +1,13 @@
 import cassandra
-from cassandra.cluster import Cluster, QueryExhausted
+from cassandra.cluster import Cluster, QueryExhausted, Session
 from cassandra.auth import PlainTextAuthProvider
 from src.logger.auto_logger import autolog
 from os import listdir
 import csv
+import pandas as pd
 import json
+
+from src.ttp import pandas_factory
 class CassandraOperations:
     def __init__(self):
         self.dbpath         =  "src/DATABASE_OPERATIONS"
@@ -71,9 +74,14 @@ class CassandraOperations:
         lst_dict = [x for x in scheme_dict]
         lst = ' '.join([str(elem)+"," for elem in lst_dict])
         lst = lst[:-1]
+        self.lst = lst
         try:
             count = self.session.execute(f"SELECT COUNT(*) FROM {self.keyspace_name}.{table_name};")
-            count = count[0].count
+            try:
+                count = count[0].count
+            except :
+                count = 1
+            
             
             for files in listdir(path):
                 with open (f"{path}/{files}", "r") as csv_file:
@@ -101,9 +109,50 @@ class CassandraOperations:
                         print(BATCH_STMT)
                         batch_size = 0 
         except Exception as e:
-            autolog("Failed to insert data" + e.text,3)
+            autolog("Failed to insert data" ,3)
         
 
 
-
+    def pandas_factory(colnames, rows):
+        return pd.DataFrame(rows, columns=colnames)
             
+    def fetch(self):
+        query = (f"SELECT id,{self.lst} FROM {self.keyspace_name}.test;")
+        self.session.row_factory = pandas_factory
+        self.session.default_fetch_size = 1000000
+        rows = self.session.execute(query)
+        df = pd.DataFrame()
+        df = df.append(rows._current_rows)
+        while rows.has_more_pages == True:
+            rows.fetch_next_page()
+            df = df.append(rows._current_rows)
+        df = df.round(4)
+        df.to_csv("src\\preprocessing.csv",index=None, header=True)
+            
+
+
+
+
+
+
+
+
+    """from cassandra.cluster import Cluster
+from cassandra.auth import PlainTextAuthProvider
+import pandas as pd
+
+def pandas_factory(colnames, rows):
+    return pd.DataFrame(rows, columns=colnames)
+
+cluster = Cluster(
+    contact_points=['127.0.0.1'], 
+    auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
+)
+session = cluster.connect()
+session.set_keyspace('giodevks')
+session.row_factory = pandas_factory
+session.default_fetch_size = 10000000 #needed for large queries, otherwise driver will do pagination. Default is 50000.
+
+rows = session.execute(select * from my_table)
+df = rows._current_rows
+print df.head()"""
