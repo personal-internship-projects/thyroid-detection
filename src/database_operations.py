@@ -7,7 +7,7 @@ import csv
 import pandas as pd
 import json
 
-from src.ttp import pandas_factory
+#from src.ttp import pandas_factory
 class CassandraOperations:
     def __init__(self):
         self.dbpath         =  "src/DATABASE_OPERATIONS"
@@ -113,12 +113,12 @@ class CassandraOperations:
         
 
 
-    def pandas_factory(colnames, rows):
+    def pandas_factory(self,colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
             
     def fetch(self):
         query = (f"SELECT id,{self.lst} FROM {self.keyspace_name}.test;")
-        self.session.row_factory = pandas_factory
+        self.session.row_factory = self.pandas_factory
         self.session.default_fetch_size = 1000000
         rows = self.session.execute(query)
         df = pd.DataFrame()
@@ -127,7 +127,7 @@ class CassandraOperations:
             rows.fetch_next_page()
             df = df.append(rows._current_rows)
         df = df.round(4)
-        df.to_csv("src\\preprocessing.csv",index=None, header=True)
+        df.to_csv("src/preprocessing.csv",index=None, header=True)
             
 
 
