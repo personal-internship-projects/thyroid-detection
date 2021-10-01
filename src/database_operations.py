@@ -121,7 +121,7 @@ class CassandraOperations:
                     BATCH_STMT += ' APPLY BATCH;'
                     self.session.execute(BATCH_STMT)
                     print(BATCH_STMT)
-                    batch_size = 0'''
+                    batch_size = 0 #'''
 
 
     
