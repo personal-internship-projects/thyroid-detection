@@ -4,3 +4,4 @@ __pycache__/
 src/logs/*
 scraper.log
 src/secure-connect-test.zip
+.vscode/
