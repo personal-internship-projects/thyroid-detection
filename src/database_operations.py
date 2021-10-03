@@ -97,6 +97,8 @@ class CassandraOperations:
                                 BATCH_STMT += query
                                 batch_size += 1 
                             else:
+                                query = f"INSERT INTO {self.keyspace_name}.{table_name} (id,{lst}) VALUES ({count},{words});"
+                                BATCH_STMT += query
                                 BATCH_STMT += ' APPLY BATCH;'
                                 self.session.execute(BATCH_STMT)
                                 print(BATCH_STMT)
