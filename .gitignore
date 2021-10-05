@@ -3,5 +3,6 @@ src/dataset/*
 __pycache__/
 src/logs/*
 scraper.log
-src/secure-connect-test.zip
+src/secure*
 .vscode/
+config.ini
