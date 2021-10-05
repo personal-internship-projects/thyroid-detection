@@ -1,24 +1,39 @@
+from enum import auto
 import cassandra
 from cassandra.cluster import Cluster, QueryExhausted, Session
 from cassandra.auth import PlainTextAuthProvider
+from cassandra.metadata import Token
 from src.logger.auto_logger import autolog
-from os import listdir
+from os import listdir, makedirs
+from os.path import isdir
 import csv
 import pandas as pd
 import json
+import configparser
 
 #from src.ttp import pandas_factory
 class CassandraOperations:
     def __init__(self):
-        self.dbpath         =  "src/DATABASE_OPERATIONS"
-        self.schema_path    =  "src/schema_training.json" 
-        self.finalCsvTest   =  "src/dataset/final_csv/test"
-        self.finalCsvTrain  =  "src/dataset/final_csv/train"
-        self.goodCsvPath    =  "./src/dataset/csv_operation/GoodCSV"
-        self.badCsvPath     =  "./src/dataset/csv_operation/BadCSV"
-        self.keyspace_name  =  "ineuron"
+        self.dbpath                =  "src/DATABASE_OPERATIONS"
+        self.schema_path           =  "src/schema_training.json" 
+        self.finalCsvTest          =  "src/dataset/final_csv/test"
+        self.finalCsvTrain         =  "src/dataset/final_csv/train"
+        self.goodCsvPath           =  "./src/dataset/csv_operation/GoodCSV"
+        self.badCsvPath            =  "./src/dataset/csv_operation/BadCSV"
+        self.combinedTrain         =  "./src/dataset/combined_csv/train"
+        self.combinedTest          =  "./src/dataset/combined_csv/test"
+        self.keyspace_name         =  "ineuron"
 
-    
+    def createPreprocessedCsvDirectory(self):
+        autolog("Creating Directory for combined csv ...")
+        if not isdir(self.combinedTest):
+            makedirs(self.combinedTest)  
+        if not isdir(self.combinedTrain):
+            makedirs(self.combinedTrain)
+        autolog("Directories created.")
+
+
+
     def schemaParser(self) -> dict():
         dic = dict()
         try:
@@ -35,22 +50,33 @@ class CassandraOperations:
     def databaseConnection(self):
         try:
             autolog("Trying to initialize Connection...")
+            obj = configparser.ConfigParser()
+            obj.read("./config.ini")
+            clientId   = obj["DATABASE_CREDS"]["client_id"]
+            secret     = obj["DATABASE_CREDS"]["client_secret"]
+            bundlePath = obj["DATABASE_CREDS"]["secure_bundle_path"]
+            
             cloud_config= {
-                'secure_connect_bundle': 'src/secure-connect-test.zip'
+                'secure_connect_bundle': bundlePath
             }
-            auth_provider = PlainTextAuthProvider('djMBOJUicLZEvpHTGZFRxDBI', 'WCYx-3FA+gBijXY.YqKWUbMnLh8Wg2bS5ZPuUU8ex4Hzlh6IhmZZbtT81ZAOxNYy_ld5HhT.D76SfBtSfph6ZMeXWZm50ozHjic2A-Dihriicj2nQcOe0.-,fKt1AfY4')
+            #client_id = "djMBOJUicLZEvpHTGZFRxDBI"
+            #client_secret = "WCYx-3FA+gBijXY.YqKWUbMnLh8Wg2bS5ZPuUU8ex4Hzlh6IhmZZbtT81ZAOxNYy_ld5HhT.D76SfBtSfph6ZMeXWZm50ozHjic2A-Dihriicj2nQcOe0.-,fKt1AfY4"
+
+            auth_provider = PlainTextAuthProvider(clientId, secret)
             cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
             self.session = cluster.connect()
             autolog("Connection started sucessfully.")
         except ConnectionError:
             autolog("Error while connecting to database.")
-    
+
+
     def deleteTable (self, table_name):
         try:
             self.session.execute(f"Drop table if exists {self.keyspace_name}.{table_name}")
             autolog(f"Deleted {table_name} successfully")
         except:
             autolog(f"Failed to delete table {table_name}")
+
 
     def createTable(self, table_name):
         autolog("Function Started")
@@ -82,8 +108,8 @@ class CassandraOperations:
             except :
                 count = 1
             
-            
             for files in listdir(path):
+                autolog(f"Opening {files}...")
                 with open (f"{path}/{files}", "r") as csv_file:
                     next(csv_file)
                     reader = csv.reader(csv_file, delimiter="\n")
@@ -101,7 +127,6 @@ class CassandraOperations:
                                 BATCH_STMT += query
                                 BATCH_STMT += ' APPLY BATCH;'
                                 self.session.execute(BATCH_STMT)
-                                print(BATCH_STMT)
                                 BATCH_STMT = "BEGIN BATCH "
                                 batch_size = 0
                             count += 1
@@ -109,52 +134,37 @@ class CassandraOperations:
                         BATCH_STMT += ' APPLY BATCH;'
                         self.session.execute(BATCH_STMT)
                         print(BATCH_STMT)
-                        batch_size = 0 
+                        batch_size = 0
+            autolog(f"Inserted data successfully into database.")             
         except Exception as e:
-            autolog("Failed to insert data" ,3)
-        
+            autolog("Failed to insert data" ,3)  
 
 
     def pandas_factory(self,colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
             
-    def fetch(self):
+    def fetch(self, path):
+        scheme_dict = self.schemaParser()
+        lst_dict = [x for x in scheme_dict]
+        lst = ' '.join([str(elem)+"," for elem in lst_dict])
+        lst = lst[:-1]
+        autolog("Fetching data from database...")
         query = (f"SELECT id,{self.lst} FROM {self.keyspace_name}.test;")
         self.session.row_factory = self.pandas_factory
         self.session.default_fetch_size = 1000000
-        rows = self.session.execute(query)
+        try:
+            rows = self.session.execute(query)
+            autolog("Query executed successfully.")
+        except Exception as e:
+            autolog("Query failed to execute.", 3)
+            exit(-1)
+
         df = pd.DataFrame()
         df = df.append(rows._current_rows)
         while rows.has_more_pages == True:
             rows.fetch_next_page()
             df = df.append(rows._current_rows)
         df = df.round(4)
-        df.to_csv("src/preprocessing.csv",index=None, header=True)
+        df.to_csv(f"{path}/combined.csv", index=None, header=True)
+        autolog(f"Stored fetched data to {path}/combined.csv")
             
-
-
-
-
-
-
-
-
-    """from cassandra.cluster import Cluster
-from cassandra.auth import PlainTextAuthProvider
-import pandas as pd
-
-def pandas_factory(colnames, rows):
-    return pd.DataFrame(rows, columns=colnames)
-
-cluster = Cluster(
-    contact_points=['127.0.0.1'], 
-    auth_provider = PlainTextAuthProvider(username='cassandra', password='cassandra')
-)
-session = cluster.connect()
-session.set_keyspace('giodevks')
-session.row_factory = pandas_factory
-session.default_fetch_size = 10000000 #needed for large queries, otherwise driver will do pagination. Default is 50000.
-
-rows = session.execute(select * from my_table)
-df = rows._current_rows
-print df.head()"""
