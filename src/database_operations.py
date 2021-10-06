@@ -57,12 +57,12 @@ class CassandraOperations:
             bundlePath = obj["DATABASE_CREDS"]["secure_bundle_path"]
             
             cloud_config= {
-                'secure_connect_bundle': bundlePath
+                'secure_connect_bundle': "src/secure-connect-test.zip" #bundle
             }
-            #client_id = "djMBOJUicLZEvpHTGZFRxDBI"
-            #client_secret = "WCYx-3FA+gBijXY.YqKWUbMnLh8Wg2bS5ZPuUU8ex4Hzlh6IhmZZbtT81ZAOxNYy_ld5HhT.D76SfBtSfph6ZMeXWZm50ozHjic2A-Dihriicj2nQcOe0.-,fKt1AfY4"
+            #client_id = "sBKfIXPONuTQnWvElwjckcyG"
+            #client_secret = "jLDP1mfaC7ZNjZZMxcLniG14X-oQ0kBMJNU,95tkLtm5Nhmqaa8a8ztgmRXxtaq+MZhtLowgNns7KdH_g7cDy0xrb1WfADqNNf5c35BxYPWs47TZYgJtuWele1TtJT3s"
 
-            auth_provider = PlainTextAuthProvider(clientId, secret)
+            auth_provider = PlainTextAuthProvider("vbgReWjmZdzBpQyPEjftPbwA", "vQoWWbheK.Qfqxaqo-ibTYrdWpWIgPXX,TTJKF8RCObUavuzrIpcED.1YjohMly-RNIiyCdW0bGrxLq.69B+_S3rLTHJ.iwINqvf505ITdTMmK+EImR2.vz0FYovlyv8")
             cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
             self.session = cluster.connect()
             autolog("Connection started sucessfully.")
@@ -143,13 +143,13 @@ class CassandraOperations:
     def pandas_factory(self,colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
             
-    def fetch(self, path):
+    def fetch(self, path, table_name):
         scheme_dict = self.schemaParser()
         lst_dict = [x for x in scheme_dict]
         lst = ' '.join([str(elem)+"," for elem in lst_dict])
         lst = lst[:-1]
         autolog("Fetching data from database...")
-        query = (f"SELECT id,{self.lst} FROM {self.keyspace_name}.test;")
+        query = (f"SELECT id,{self.lst} FROM {self.keyspace_name}.{table_name};")
         self.session.row_factory = self.pandas_factory
         self.session.default_fetch_size = 1000000
         try:
