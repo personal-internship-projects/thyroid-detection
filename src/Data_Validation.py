@@ -1,6 +1,4 @@
 import os, shutil
-
-from numpy import NaN
 import src.File_Type_Validation as fv
 import json
 from src.logger.auto_logger import autolog
