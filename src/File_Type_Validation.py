@@ -37,3 +37,7 @@ class File_Type_Validation:
                 autolog(f"Copying bad file {i} to {self.badCsvPath}")
 
 
+if __name__=='__main__':
+    x = File_Type_Validation("./src/dataset")
+    x.createCsvDir()
+    x.convertToCsv()

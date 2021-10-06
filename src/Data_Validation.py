@@ -145,3 +145,20 @@ class DataValidation :
 
 
 
+if __name__=='__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path")
+    args = parser.parse_args()
+    print(args.path)
+
+
+    zz =DataValidation()
+    zz.goodCsvPath = args.path
+    zz.makeFinalCsvDirectory()
+    z,g,dic = zz.verifyingSchema()
+    a= zz.validateColumnLength(g)
+    b = zz.validateMissingValuesInWholeColumn()
+    d= zz.getColumnName()
+    e=zz.addColumnNames(d)
+    f = zz.addQuotesToString(dic)
