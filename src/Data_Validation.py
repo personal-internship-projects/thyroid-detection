@@ -7,12 +7,14 @@ import re
 
 class DataValidation :
     def __init__(self) -> None:
-       self.schema_path = 'src/schema_training.json' 
-       self.finalCsv =  "src/dataset/final_csv"
-       self.finalCsvTest =  "src/dataset/final_csv/test"
-       self.finalCsvTrain = "src/dataset/final_csv/train"
-       self.goodCsvPath = "./src/dataset/csv_operation/GoodCSV"
-       self.badCsvPath  = "./src/dataset/csv_operation/BadCSV"
+        self.schema_path      =  'src/schema_training.json' 
+        self.finalCsv         =  "src/dataset/final_csv"
+        self.finalCsvTest     =  "src/dataset/final_csv/test"
+        self.finalCsvPredict  =  "src/dataset/final_csv/predict"
+        self.finalCsvTrain    =  "src/dataset/final_csv/train"
+        self.goodCsvPath      =  "src/dataset/csv_operation/GoodCSV"
+        self.badCsvPath       =  "src/dataset/csv_operation/BadCSV"
+        self.predictCsvPath   =  "src/dataset/csv_operation/PredictCsv"
 
 
     def makeFinalCsvDirectory(self):
@@ -21,6 +23,10 @@ class DataValidation :
 
         if not os.path.isdir(self.finalCsvTrain):
             os.makedirs(self.finalCsvTrain)
+
+        if not os.path.isdir(self.finalCsvPredict):
+            os.makedirs(self.finalCsvPredict)
+
 
 
     def verifyingSchema(self):
@@ -99,29 +105,30 @@ class DataValidation :
         return lst
 
 
-    def addColumnNames(self, lst):
+    def addColumnNames(self, lst, pathToCsv):
         autolog("Adding column named to csv ...")
-        for files in os.listdir(self.goodCsvPath):
+        for files in os.listdir(pathToCsv):
             csv = DataFrame()
-            df1 = read_csv(f"{self.goodCsvPath}/{files}")
+            df1 = read_csv(f"{pathToCsv}/{files}")
             count = 0
             for labels in lst:
                 csv[f"{labels}"] = df1.iloc(axis=1)[count]
                 count += 1
 
-            fileName = re.match(".*\.data\..*",files)
-            print(fileName)
-            if fileName:
+
+            if "data" in files:
                 autolog(f"Adding {files} to train dataset")
                 csv.to_csv(f"{self.finalCsvTrain}/{files}", index=None, header=True)
-            else:
+            elif "test" in files:
                 autolog(f"Adding {files} to test dataset")
                 csv.to_csv(f"{self.finalCsvTest}/{files}", index=None, header=True)
+            else:
+                autolog(f"Adding {files} to predict dataset")
+                csv.to_csv(f"{self.finalCsvPredict}/{files}", index=None, header=True)
 
         autolog("Done.")
     
     
-
     def addQuotesToString(self, dict):
         autolog("Adding quotes to strings in dataset started...")
         for x in os.listdir(self.finalCsv):
@@ -160,5 +167,5 @@ if __name__=='__main__':
     a= zz.validateColumnLength(g)
     b = zz.validateMissingValuesInWholeColumn()
     d= zz.getColumnName()
-    e=zz.addColumnNames(d)
+    e=zz.addColumnNames(d[:-1])
     f = zz.addQuotesToString(dic)
