@@ -5,8 +5,9 @@ from src.logger.auto_logger import autolog
 class File_Type_Validation:
     def __init__(self, path) -> None:
         self.path = path
-        self.goodCsvPath = self.path+"/csv_operation/GoodCSV"
-        self.badCsvPath = self.path+"/csv_operation/BadCSV"
+        self.goodCsvPath    = self.path+"/csv_operation/GoodCSV"
+        self.badCsvPath     = self.path+"/csv_operation/BadCSV"
+        self.predictCsvPath = self.path+"/csv_operation/PredictCsv"
 
     def createCsvDir (self):
 
@@ -15,6 +16,9 @@ class File_Type_Validation:
             os.makedirs(self.goodCsvPath)  
         if not os.path.isdir(self.badCsvPath):
             os.makedirs(self.badCsvPath)
+        if not os.path.isdir(self.predictCsvPath):
+            os.makedirs(self.predictCsvPath)
+            
         autolog("Directories created.")
 
 

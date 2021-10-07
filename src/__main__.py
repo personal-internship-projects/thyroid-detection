@@ -1,2 +1,2 @@
-from src import train, test
+from src import predict
 

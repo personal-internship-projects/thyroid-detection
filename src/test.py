@@ -6,5 +6,5 @@ db.createPreprocessedCsvDirectory()
 db.deleteTable("test")
 db.createTable('test')
 db.insertValidatedData(db.finalCsvTest, "test")
-db.fetch(db.combinedTest,'test')
+db.fetchTable(db.combinedTest,'test')
 
