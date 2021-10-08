@@ -16,34 +16,27 @@ from shutil import rmtree
 class CassandraOperations:
     def __init__(self):
         self.dbpath                =  "src/DATABASE_OPERATIONS"
-        self.schema_path           =  "src/schema_training.json" 
-        self.schema_path_pred      =  "src/schema_prediction.json"
-        self.finalCsv              =  "src/dataset/final_csv"
+        self.schemaPath            =  "src/schema_training.json" 
+        self.schemaPathPredict     =  "src/schema_predict.json"
         self.finalCsvTest          =  "src/dataset/final_csv/test"
         self.finalCsvTrain         =  "src/dataset/final_csv/train"
         self.finalCsvPredict       =  "src/dataset/final_csv/predict"
-        self.goodCsvPath           =  "./src/dataset/csv_operation/GoodCSV"
-        self.badCsvPath            =  "./src/dataset/csv_operation/BadCSV"
-        self.combinedTrain         =  "./src/dataset/combined_csv/train"
-        self.combinedTest          =  "./src/dataset/combined_csv/test"
-        self.combinedPredict       =  "./src/dataset/combined_csv/predict"
-        self.csvOperation          =  "src/dataset/csv_operation"
+        self.goodCsvPath           =  "src/dataset/csv_operation/GoodCSV"
+        self.badCsvPath            =  "src/dataset/csv_operation/BadCSV"
+        self.combinedTrain         =  "src/dataset/combined_csv/train"
+        self.combinedTest          =  "src/dataset/combined_csv/test"
+        self.combinedPredict       =  "src/dataset/combined_csv/predict"
         self.keyspace_name         =  "ineuron"
 
-    def createPreprocessedCsvDirectory(self):
+    def createPreprocessedCsvDirectory(self, combinedDirectoryLocation):
         autolog("Creating Directory for combined csv ...")
-        if not isdir(self.combinedTest):
-            makedirs(self.combinedTest)  
-        if not isdir(self.combinedTrain):
-            makedirs(self.combinedTrain)
-        if not isdir(self.combinedPredict):
-            makedirs(self.combinedPredict)
-        
+        if not isdir(combinedDirectoryLocation):
+            makedirs(combinedDirectoryLocation)  
         autolog("Directories created.")
 
 
-
-    def schemaParser(self, schemaPath) -> dict():
+    @staticmethod
+    def schemaParser(schemaPath) -> dict():
         dic = dict()
         try:
             with open(schemaPath, 'r') as f:
@@ -93,12 +86,9 @@ class CassandraOperations:
             autolog(f"Failed to delete table {table_name}")
 
 
-    def createTable(self, table_name):
+    def createTable(self, table_name, schemaPath):
         autolog("Function Started")
-        column_dict = self.schemaParser(self.schema_path)
-        if table_name == "predict":
-            column_dict = self.schemaParser(self.schema_path_pred)
-
+        column_dict = self.schemaParser(schemaPath)
         for column_name in column_dict.keys():
             datatype_of_columns = column_dict[column_name]
             try:
@@ -113,16 +103,15 @@ class CassandraOperations:
                     autolog(f"Failed to create table {table_name}")
 
 
-    def deleteCsvAfterFetch (self):
-        rmtree(self.finalCsv, ignore_errors="true")
-        rmtree(self.csvOperation, ignore_errors="true")
+    def columnNameRetriever(self, schemaPath) -> list():
+        scheme_dict = self.schemaParser(schemaPath)
+        lst_dict = [x for x in scheme_dict]
+        lst = ' '.join([str(elem)+"," for elem in lst_dict])
+        return lst[:-1]
 
 
-
-    def insertValidatedData(self, path, table_name):
-        lst = self.columnNameRetriever()[:-1]
-        if table_name == "prediction":
-            lst = lst[:-7]
+    def insertValidatedData(self, path, table_name, schemaPath):
+        lst = self.columnNameRetriever(schemaPath)
         try:
             count = self.session.execute(f"SELECT COUNT(*) FROM {self.keyspace_name}.{table_name};")
             try:
@@ -166,10 +155,8 @@ class CassandraOperations:
     def pandas_factory(self,colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
             
-    def fetchTable(self, path, tableName):
-        lst = self.columnNameRetriever()[:-1]
-        if tableName == "predict":
-            lst = lst[:-7]
+    def fetch(self, path, tableName, schemaPath):
+        lst = self.columnNameRetriever(schemaPath)
 
         autolog("Fetching data from database...")
         query = (f"SELECT id,{lst} FROM {self.keyspace_name}.{tableName};")
@@ -188,17 +175,12 @@ class CassandraOperations:
             rows.fetch_next_page()
             df = df.append(rows._current_rows)
         df = df.round(4)
+
         if tableName == "test":
             df.iloc[:,-1].to_csv(f"{path}/class.csv", index=None, header=True)
             df.iloc[:,:-1].to_csv(f"{path}/combined.csv", index=None, header=True)
-        
         else:
             df.to_csv(f"{path}/combined.csv", index=None, header=True)
-
         autolog(f"Stored fetched data to {path}/combined.csv")
             
-if __name__=='__main__':
-    db = CassandraOperations()
-    db.databaseConnection()
 
-    db.fetchTableTest(db.combinedTest)
