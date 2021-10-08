@@ -15,29 +15,30 @@ import configparser
 class CassandraOperations:
     def __init__(self):
         self.dbpath                =  "src/DATABASE_OPERATIONS"
-        self.schema_path           =  "src/schema_training.json" 
+        self.schemaPath            =  "src/schema_training.json" 
+        self.schemaPathPredict     =  "src/schema_predict.json"
         self.finalCsvTest          =  "src/dataset/final_csv/test"
         self.finalCsvTrain         =  "src/dataset/final_csv/train"
-        self.goodCsvPath           =  "./src/dataset/csv_operation/GoodCSV"
-        self.badCsvPath            =  "./src/dataset/csv_operation/BadCSV"
-        self.combinedTrain         =  "./src/dataset/combined_csv/train"
-        self.combinedTest          =  "./src/dataset/combined_csv/test"
+        self.finalCsvPredict       =  "src/dataset/final_csv/predict"
+        self.goodCsvPath           =  "src/dataset/csv_operation/GoodCSV"
+        self.badCsvPath            =  "src/dataset/csv_operation/BadCSV"
+        self.combinedTrain         =  "src/dataset/combined_csv/train"
+        self.combinedTest          =  "src/dataset/combined_csv/test"
+        self.combinedPredict       =  "src/dataset/combined_csv/predict"
         self.keyspace_name         =  "ineuron"
 
-    def createPreprocessedCsvDirectory(self):
+    def createPreprocessedCsvDirectory(self, combinedDirectoryLocation):
         autolog("Creating Directory for combined csv ...")
-        if not isdir(self.combinedTest):
-            makedirs(self.combinedTest)  
-        if not isdir(self.combinedTrain):
-            makedirs(self.combinedTrain)
+        if not isdir(combinedDirectoryLocation):
+            makedirs(combinedDirectoryLocation)  
         autolog("Directories created.")
 
 
-
-    def schemaParser(self) -> dict():
+    @staticmethod
+    def schemaParser(schemaPath) -> dict():
         dic = dict()
         try:
-            with open(self.schema_path, 'r') as f:
+            with open(schemaPath, 'r') as f:
                 dic = json.load(f)
             
                 f.close()
@@ -78,9 +79,9 @@ class CassandraOperations:
             autolog(f"Failed to delete table {table_name}")
 
 
-    def createTable(self, table_name):
+    def createTable(self, table_name, schemaPath):
         autolog("Function Started")
-        column_dict = self.schemaParser()
+        column_dict = self.schemaParser(schemaPath)
         for column_name in column_dict.keys():
             datatype_of_columns = column_dict[column_name]
             try:
@@ -95,12 +96,15 @@ class CassandraOperations:
                     autolog(f"Failed to create table {table_name}")
 
 
-    def insertValidatedData(self, path, table_name):
-        scheme_dict = self.schemaParser()
+    def columnNameRetriever(self, schemaPath) -> list():
+        scheme_dict = self.schemaParser(schemaPath)
         lst_dict = [x for x in scheme_dict]
         lst = ' '.join([str(elem)+"," for elem in lst_dict])
-        lst = lst[:-1]
-        self.lst = lst
+        return lst[:-1]
+
+
+    def insertValidatedData(self, path, table_name, schemaPath):
+        lst = self.columnNameRetriever(schemaPath)
         try:
             count = self.session.execute(f"SELECT COUNT(*) FROM {self.keyspace_name}.{table_name};")
             try:
@@ -143,13 +147,11 @@ class CassandraOperations:
     def pandas_factory(self,colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
             
-    def fetch(self, path, table_name):
-        scheme_dict = self.schemaParser()
-        lst_dict = [x for x in scheme_dict]
-        lst = ' '.join([str(elem)+"," for elem in lst_dict])
-        lst = lst[:-1]
+    def fetch(self, path, tableName, schemaPath):
+        lst = self.columnNameRetriever(schemaPath)
+
         autolog("Fetching data from database...")
-        query = (f"SELECT id,{self.lst} FROM {self.keyspace_name}.{table_name};")
+        query = (f"SELECT id,{lst} FROM {self.keyspace_name}.{tableName};")
         self.session.row_factory = self.pandas_factory
         self.session.default_fetch_size = 1000000
         try:
@@ -165,6 +167,12 @@ class CassandraOperations:
             rows.fetch_next_page()
             df = df.append(rows._current_rows)
         df = df.round(4)
-        df.to_csv(f"{path}/combined.csv", index=None, header=True)
+
+        if tableName == "test":
+            df.iloc[:,-1].to_csv(f"{path}/class.csv", index=None, header=True)
+            df.iloc[:,:-1].to_csv(f"{path}/combined.csv", index=None, header=True)
+        else:
+            df.to_csv(f"{path}/combined.csv", index=None, header=True)
         autolog(f"Stored fetched data to {path}/combined.csv")
             
+
