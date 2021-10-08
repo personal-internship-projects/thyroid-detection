@@ -4,28 +4,29 @@ import json
 from src.logger.auto_logger import autolog
 from pandas import read_csv, DataFrame
 import re
+import src.database_operations as db
 
 class DataValidation :
     def __init__(self) -> None:
-       self.schema_path = 'src/schema_training.json' 
-       self.finalCsv =  "src/dataset/final_csv"
-       self.finalCsvTest =  "src/dataset/final_csv/test"
-       self.finalCsvTrain = "src/dataset/final_csv/train"
-       self.goodCsvPath = "./src/dataset/csv_operation/GoodCSV"
-       self.badCsvPath  = "./src/dataset/csv_operation/BadCSV"
+       self.schemaPath        =  "src/schema_training.json" 
+       self.schemaPathPredict =  "src/schema_predict.json"
+       self.finalCsv          =  "src/dataset/final_csv"
+       self.finalCsvTest      =  "src/dataset/final_csv/test"
+       self.finalCsvTrain     =  "src/dataset/final_csv/train"
+       self.finalCsvPredict   =  "src/dataset/final_csv/predict"
+       self.goodCsvPath       =  "src/dataset/csv_operation/GoodCSV"
+       self.badCsvPath        =  "src/dataset/csv_operation/BadCSV"
+       self.predictCsvPath    =  "src/dataset/csv_operation/PredictCSV"
 
 
-    def makeFinalCsvDirectory(self):
-        if not os.path.isdir(self.finalCsvTest):
-            os.makedirs(self.finalCsvTest)
-
-        if not os.path.isdir(self.finalCsvTrain):
-            os.makedirs(self.finalCsvTrain)
+    def makeFinalCsvDirectory(self, finalDirectoryLocation):
+        if not os.path.isdir(finalDirectoryLocation):
+            os.makedirs(finalDirectoryLocation)
 
 
-    def verifyingSchema(self):
+    def verifyingSchema(self, schemaLoc):
         try:
-            with open(self.schema_path, 'r') as f:
+            with open(schemaLoc, 'r') as f:
                 dic = json.load(f)
                 f.close()
             
@@ -46,16 +47,15 @@ class DataValidation :
         return column_names, NumberOfColumns,dic
 
 
-    def validateColumnLength(self, NumberOfColumns):
+    def validateColumnLength(self, NumberOfColumns, path):
         try:
             autolog("Column Length Validation Started!!")
-            for files in os.listdir(self.goodCsvPath):
-                csv = read_csv(f"{self.goodCsvPath}/{files}")
+            for files in os.listdir(path):
+                csv = read_csv(f"{path}/{files}")
                 if csv.shape[1] == NumberOfColumns:
                     pass
                 else:
-                    print(NumberOfColumns)
-                    shutil.copy(self.goodCsvPath +"/" +files, self.badCsvPath)
+                    shutil.copy(path +"/" +files, self.badCsvPath)
         
         except OSError:
             autolog(f"Error Occured while moving the file :: {OSError}")
@@ -65,58 +65,46 @@ class DataValidation :
             raise e
 
     
-    def validateMissingValuesInWholeColumn(self):
+    def validateMissingValuesInWholeColumn(self, path):
         try:
             autolog("Missing Values Validation Started!!")
             
-            for files in os.listdir(self.goodCsvPath):
-                csv = read_csv(self.goodCsvPath + files)
+            for files in os.listdir(path):
+                csv = read_csv(path + files)
                 count = 0
                 for cols in csv:
                     if len(csv[cols]) - csv[cols].count == len(csv[cols]):
-                        shutil.copy(self.goodCsvPath + files, self.badCsvPath)
+                        shutil.copy(path + files, self.badCsvPath)
                         count += 1
                         break
         except:
             pass
 
     
-    def getColumnName(self):
-        lst = []
-
-        for files in os.listdir(self.badCsvPath):
-
-            with open(f"{self.badCsvPath}/{files}") as f:
-                for lines in f:
-                    labels_raw = re.match("(.+):", lines)
-                    if labels_raw:
-                        labels = labels_raw.group(1).replace(" ","_").lower()
-                        lst.append(labels)
-                        
-                lst.append('class')
-            break
-
+    def getColumnName(self, schemaPath):
+        lst = list(db.CassandraOperations.schemaParser(schemaPath).keys())
         return lst
 
 
-    def addColumnNames(self, lst):
+    def addColumnNames(self, lst, path):
         autolog("Adding column named to csv ...")
-        for files in os.listdir(self.goodCsvPath):
+        for files in os.listdir(path):
             csv = DataFrame()
-            df1 = read_csv(f"{self.goodCsvPath}/{files}")
+            df1 = read_csv(f"{path}/{files}")
             count = 0
             for labels in lst:
                 csv[f"{labels}"] = df1.iloc(axis=1)[count]
                 count += 1
 
-            fileName = re.match(".*\.data\..*",files)
-            print(fileName)
-            if fileName:
+            if "data" in files:
                 autolog(f"Adding {files} to train dataset")
                 csv.to_csv(f"{self.finalCsvTrain}/{files}", index=None, header=True)
-            else:
+            elif "test" in files:
                 autolog(f"Adding {files} to test dataset")
                 csv.to_csv(f"{self.finalCsvTest}/{files}", index=None, header=True)
+            else:
+                autolog(f"Adding {files} to predict dataset")
+                csv.to_csv(f"{self.finalCsvPredict}/{files}", index=None, header=True)
 
         autolog("Done.")
     
