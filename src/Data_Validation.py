@@ -8,6 +8,18 @@ import src.database_operations as db
 
 class DataValidation :
     def __init__(self) -> None:
+<<<<<<< HEAD
+=======
+       self.schemaPath        =  "src/schema_training.json" 
+       self.schemaPathPredict =  "src/schema_predict.json"
+       self.finalCsv          =  "src/dataset/final_csv"
+       self.finalCsvTest      =  "src/dataset/final_csv/test"
+       self.finalCsvTrain     =  "src/dataset/final_csv/train"
+       self.finalCsvPredict   =  "src/dataset/final_csv/predict"
+       self.goodCsvPath       =  "src/dataset/csv_operation/GoodCSV"
+       self.badCsvPath        =  "src/dataset/csv_operation/BadCSV"
+       self.predictCsvPath    =  "src/dataset/csv_operation/PredictCSV"
+>>>>>>> c1f574991aa5e08c607e84f383f7865dd8c57c2b
 
        self.schemaPath        =  "src/schema_training.json" 
        self.schemaPathPredict =  "src/schema_predict.json"
@@ -19,12 +31,20 @@ class DataValidation :
        self.badCsvPath        =  "src/dataset/csv_operation/BadCSV"
        self.predictCsvPath    =  "src/dataset/csv_operation/PredictCSV"
 
+<<<<<<< HEAD
 
     def makeFinalCsvDirectory(self, finalDirectoryLocation):
         if not os.path.isdir(finalDirectoryLocation):
             os.makedirs(finalDirectoryLocation)
 
 
+=======
+    def makeFinalCsvDirectory(self, finalDirectoryLocation):
+        if not os.path.isdir(finalDirectoryLocation):
+            os.makedirs(finalDirectoryLocation)
+
+
+>>>>>>> c1f574991aa5e08c607e84f383f7865dd8c57c2b
     def verifyingSchema(self, schemaLoc):
         try:
             with open(schemaLoc, 'r') as f:
@@ -85,7 +105,6 @@ class DataValidation :
     def getColumnName(self, schemaPath):
         lst = list(db.CassandraOperations.schemaParser(schemaPath).keys())
         return lst
-
 
 
     def addColumnNames(self, lst, path):
