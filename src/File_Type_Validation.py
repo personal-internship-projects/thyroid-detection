@@ -7,7 +7,7 @@ class File_Type_Validation:
         self.path = path
         self.goodCsvPath    = self.path+"/csv_operation/GoodCSV"
         self.badCsvPath     = self.path+"/csv_operation/BadCSV"
-        self.predictCsvPath = self.path+"/csv_operation/PredictCsv"
+        self.predictCsvPath = self.path+"/csv_operation/PredictCSV"
 
     def createCsvDir (self):
 
