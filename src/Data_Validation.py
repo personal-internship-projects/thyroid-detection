@@ -18,15 +18,6 @@ class DataValidation :
        self.badCsvPath        =  "src/dataset/csv_operation/BadCSV"
        self.predictCsvPath    =  "src/dataset/csv_operation/PredictCSV"
 
-       self.schemaPath        =  "src/schema_training.json" 
-       self.schemaPathPredict =  "src/schema_predict.json"
-       self.finalCsv          =  "src/dataset/final_csv"
-       self.finalCsvTest      =  "src/dataset/final_csv/test"
-       self.finalCsvTrain     =  "src/dataset/final_csv/train"
-       self.finalCsvPredict   =  "src/dataset/final_csv/predict"
-       self.goodCsvPath       =  "src/dataset/csv_operation/GoodCSV"
-       self.badCsvPath        =  "src/dataset/csv_operation/BadCSV"
-       self.predictCsvPath    =  "src/dataset/csv_operation/PredictCSV"
 
     def makeFinalCsvDirectory(self, finalDirectoryLocation):
         if not os.path.isdir(finalDirectoryLocation):
