@@ -1,6 +1,7 @@
 import src.File_Type_Validation as fv
 import src.Data_Validation as dv
-import src.database_operations as dboc 
+import src.database_operations as dboc
+import src.preprocesing as prp
 x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
@@ -20,3 +21,13 @@ db.deleteTable('train')
 db.createTable('train', db.schemaPath)
 db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
 db.fetch(db.combinedTrain, "train",  db.schemaPath)
+
+pre = prp.Preprocessing()
+pre.createPreprocessedDirectory()
+pre.readCsv(pre.trainCsv)
+pre.dropUnnecessaryColumns()
+pre.replaceWithNan()
+pre.mappingCategoricalColumns()
+pre.getDummies()
+pre.labelEncoding()
+pre.exportCsv(pre.trainCsv)
