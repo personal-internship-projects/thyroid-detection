@@ -25,5 +25,5 @@ pre.dropUnnecessaryColumns()
 pre.replaceWithNan()
 pre.mappingCategoricalColumns()
 pre.getDummies()
-pre.exportCsv(pre.predictCsv)
+pre.exportCsv(pre.preprocessedPredictCsv)
 
