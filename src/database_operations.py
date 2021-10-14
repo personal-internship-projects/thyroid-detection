@@ -175,12 +175,14 @@ class CassandraOperations:
             rows.fetch_next_page()
             df = df.append(rows._current_rows)
         df = df.round(4)
-
-        if tableName == "test":
-            df.iloc[:,-1].to_csv(f"{path}/class.csv", index=None, header=True)
-            df.iloc[:,:-1].to_csv(f"{path}/combined.csv", index=None, header=True)
-        else:
-            df.to_csv(f"{path}/combined.csv", index=None, header=True)
+        df.to_csv(f"{path}/combined.csv", index=None, header=True)
         autolog(f"Stored fetched data to {path}/combined.csv")
+
+        # if tableName == "test":
+        #     df.iloc[:,-1].to_csv(f"{path}/class.csv", index=None, header=True)
+        #     df.iloc[:,:-1].to_csv(f"{path}/combined.csv", index=None, header=True)
+        # else:
+        #     df.to_csv(f"{path}/combined.csv", index=None, header=True)
+        # autolog(f"Stored fetched data to {path}/combined.csv")
             
 
