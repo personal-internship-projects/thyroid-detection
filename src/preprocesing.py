@@ -3,7 +3,7 @@ from numpy import nan
 from sklearn.preprocessing import LabelEncoder
 from src.logger.auto_logger import autolog
 from os.path import isdir
-from os.path import isfile
+from os import makedirs
 
 class Preprocessing():
     
@@ -18,14 +18,14 @@ class Preprocessing():
 
 
     def createPreprocessedDirectory(self):
-        if isdir(self.preprocessedPredictCsv):
-            isfile(self.preprocessedPredictCsv)
+        if not isdir(self.preprocessedPredictCsv):
+            makedirs(self.preprocessedPredictCsv)
 
-        if isdir(self.preprocessedTestCsv):
-            isfile(self.preprocessedTestCsv)
+        if not isdir(self.preprocessedTestCsv):
+            makedirs(self.preprocessedTestCsv)
 
-        if isdir(self.preprocessedPredictCsv):
-            isfile(self.preprocessedPredictCsv)
+        if not isdir(self.preprocessedTrainCsv):
+            makedirs(self.preprocessedTrainCsv)
 
 
     def readCsv(self,path):
@@ -73,6 +73,6 @@ class Preprocessing():
 
 
     def exportCsv(self, path):
-        self.dataframe.to_csv(path)
+        self.dataframe.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
     
     
