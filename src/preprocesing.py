@@ -2,19 +2,37 @@ from pandas import read_csv,get_dummies
 from numpy import nan
 from sklearn.preprocessing import LabelEncoder
 from src.logger.auto_logger import autolog
-
+from os.path import isdir
+from os.path import isfile
 
 class Preprocessing():
     
     def __init__(self):
-        self.trainCsv    = "src/dataset/combined_csv/train/combined.csv"
-        self.testCsv     = "src/dataset/combined_csv/test/combined.csv"
-        self.predictCsv  = "src/dataset/combined_csv/predict/combined.csv"
+        self.trainCsv               = "src/dataset/combined_csv/train/combined.csv"
+        self.testCsv                = "src/dataset/combined_csv/test/combined.csv"
+        self.predictCsv             = "src/dataset/combined_csv/predict/combined.csv"
+
+        self.preprocessedTrainCsv   = "src/dataset/preprocessed/train"
+        self.preprocessedTestCsv    = "src/dataset/preprocessed/test"
+        self.preprocessedPredictCsv = "src/dataset/preprocessed/predict"
+
+
+    def createPreprocessedDirectory(self):
+        if isdir(self.preprocessedPredictCsv):
+            isfile(self.preprocessedPredictCsv)
+
+        if isdir(self.preprocessedTestCsv):
+            isfile(self.preprocessedTestCsv)
+
+        if isdir(self.preprocessedPredictCsv):
+            isfile(self.preprocessedPredictCsv)
+
 
     def readCsv(self,path):
         self.dataframe = read_csv(f'{path}')
         autolog("Read CSV Successfully")
-    
+
+
     def dropUnnecessaryColumns(self):
         self.dataframe.drop(columns="id",inplace=True)
         self.dataframe.drop(['tsh_measured','t3_measured','tt4_measured','t4u_measured','fti_measured','tbg_measured'],axis =1,inplace=True)
@@ -28,6 +46,7 @@ class Preprocessing():
             if count!=0:
                 self.dataframe[column] = self.dataframe[column].replace('?',nan)    
         autolog("Replaced '?' with nan")
+
 
     def mappingCategoricalColumns(self):
         autolog("Mapping started for categorical columns")
@@ -45,10 +64,15 @@ class Preprocessing():
     def getDummies(self):
         self.dataframe = get_dummies(self.dataframe, columns=['referral_source'])
         autolog("Applied dummies for referral_source column completed")
-        
+
+
     def labelEncoding(self):
         lblEn = LabelEncoder()
         self.dataframe['class'] =lblEn.fit_transform(self.dataframe['class'])
-        autolog("Label Encoding completed successfully." )
+        autolog("Label Encoding completed successfully.")
+
+
+    def exportCsv(self, path):
+        self.dataframe.to_csv(path)
     
     
