@@ -1,6 +1,10 @@
+import numpy
 from pandas import read_csv,get_dummies
 from numpy import nan
+import pandas
 from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import KNNImputer
+from imblearn.over_sampling import RandomOverSampler
 from src.logger.auto_logger import autolog
 from os.path import isdir
 from os import makedirs
@@ -35,7 +39,7 @@ class Preprocessing():
 
     def dropUnnecessaryColumns(self):
         self.dataframe.drop(columns="id",inplace=True)
-        self.dataframe.drop(['tsh_measured','t3_measured','tt4_measured','t4u_measured','fti_measured','tbg_measured'],axis =1,inplace=True)
+        self.dataframe.drop(['tsh_measured','t3_measured','tt4_measured','t4u_measured','fti_measured','tbg_measured','tbg'],axis =1,inplace=True)
         autolog("Dropped UnnecessaryColumns")
     
 
@@ -71,8 +75,52 @@ class Preprocessing():
         self.dataframe['class'] =lblEn.fit_transform(self.dataframe['class'])
         autolog("Label Encoding completed successfully.")
 
+    def imputeNanvalues(self):
+        autolog("Imputing NaN values started")
+        imputer = KNNImputer(n_neighbors=3,weights='uniform', missing_values=nan)
+        np_array = imputer.fit_transform(self.dataframe)
+        
+        autolog("NaN Values imputation completed successfully")
+
+        autolog("Starting array conversion to dataframe")
+        self.new_dataframe = pandas.DataFrame(data = numpy.round(np_array), columns=self.dataframe.columns)
+        autolog("Array to dataframe conversion completed successfully")
+
+    def applyingLogTransformation(self):
+        autolog("Log Transformation Started")
+        columns = ['age','tsh','t3','tt4','t4u','fti']
+        for column in columns:
+            self.new_dataframe[column] = numpy.log(1 + self.new_dataframe[column])
+        self.new_dataframe.drop(columns='tsh',inplace=True)
+        autolog("Dropped TSH column") 
+        autolog("Log Transformation Completed")
+            
+    def resampleData(self):
+        x = self.new_dataframe.drop(['class'],axis=1)
+        y = self.new_dataframe['class']
+        rdsmple = RandomOverSampler()
+        x_sampled,y_sampled  = rdsmple.fit_resample(x,y)
+        self.resampled_dataframe = pandas.DataFrame(data = x_sampled, columns = x.columns)
 
     def exportCsv(self, path):
-        self.dataframe.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
+        self.resampled_dataframe.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
+
     
-    
+if __name__ == '__main__':
+    from src.database_operations import CassandraOperations
+    ops = CassandraOperations()
+    ops.databaseConnection()
+    ops.fetch(ops.combinedTrain, "train",  ops.schemaPath)
+
+    prp = Preprocessing()
+    prp.readCsv(prp.trainCsv)
+    prp.createPreprocessedDirectory()
+    prp.dropUnnecessaryColumns()
+    prp.replaceWithNan()
+    prp.mappingCategoricalColumns()
+    prp.getDummies()
+    prp.labelEncoding()
+    prp.imputeNanvalues()
+    prp.applyingLogTransformation()
+    prp.resampleData()
+    prp.exportCsv(prp.preprocessedTrainCsv)
