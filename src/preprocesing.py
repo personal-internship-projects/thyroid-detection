@@ -2,6 +2,7 @@ import numpy
 from pandas import read_csv,get_dummies
 from numpy import nan
 import pandas
+import pickle
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import KNNImputer
 from imblearn.over_sampling import RandomOverSampler
@@ -19,6 +20,7 @@ class Preprocessing():
         self.preprocessedTrainCsv   = "src/dataset/preprocessed/train"
         self.preprocessedTestCsv    = "src/dataset/preprocessed/test"
         self.preprocessedPredictCsv = "src/dataset/preprocessed/predict"
+        self.modelsDirs             = "src/models"
 
 
     def createPreprocessedDirectory(self):
@@ -30,6 +32,9 @@ class Preprocessing():
 
         if not isdir(self.preprocessedTrainCsv):
             makedirs(self.preprocessedTrainCsv)
+
+        if not isdir(self.modelsDirs):
+            makedirs(self.modelsDirs)
 
 
     def readCsv(self,path):
@@ -72,8 +77,12 @@ class Preprocessing():
 
     def labelEncoding(self):
         lblEn = LabelEncoder()
-        self.dataframe['class'] =lblEn.fit_transform(self.dataframe['class'])
+        labelencoding =lblEn.fit(self.dataframe['class'])
+        self.dataframe['class'] =lblEn.transform(self.dataframe['class'])
         autolog("Label Encoding completed successfully.")
+
+        with open(f"{self.modelsDirs}/encoder.pkl", 'wb') as file:
+         pickle.dump(labelencoding, file)
 
     def imputeNanvalues(self):
         autolog("Imputing NaN values started")
