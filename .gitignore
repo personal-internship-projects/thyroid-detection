@@ -7,3 +7,4 @@ src/secure*
 .vscode/
 config.ini
 .idea
+src/models
