@@ -9,6 +9,7 @@ from imblearn.over_sampling import RandomOverSampler
 from src.logger.auto_logger import autolog
 from os.path import isdir
 from os import makedirs
+from src.clustering import Kmeansclustering
 
 class Preprocessing():
     
@@ -20,6 +21,7 @@ class Preprocessing():
         self.preprocessedTrainCsv   = "src/dataset/preprocessed/train"
         self.preprocessedTestCsv    = "src/dataset/preprocessed/test"
         self.preprocessedPredictCsv = "src/dataset/preprocessed/predict"
+        self.preprocessedNullCsv    = "src/dataset/preprocessed"
         self.modelsDirs             = "src/models"
 
 
@@ -57,7 +59,7 @@ class Preprocessing():
         autolog("Replaced '?' with nan")
 
 
-    def mappingCategoricalColumns(self):
+    def encodingCategoricalColumnsTraining(self):
         autolog("Mapping started for categorical columns")
         self.dataframe['sex'] = self.dataframe['sex'].map({'F':0 , 'M':1})
         autolog("Mapping for sex column completed")
@@ -69,13 +71,9 @@ class Preprocessing():
 
         autolog("Mapping completed")
 
-        
-    def getDummies(self):
         self.dataframe = get_dummies(self.dataframe, columns=['referral_source'])
         autolog("Applied dummies for referral_source column completed")
 
-
-    def labelEncoding(self):
         lblEn = LabelEncoder()
         labelencoding =lblEn.fit(self.dataframe['class'])
         self.dataframe['class'] =lblEn.transform(self.dataframe['class'])
@@ -83,36 +81,62 @@ class Preprocessing():
 
         with open(f"{self.modelsDirs}/encoder.pkl", 'wb') as file:
          pickle.dump(labelencoding, file)
+        
+    def seperateLabelfeature(self,column_name):
+        self.X = self.dataframe.drop(columns = column_name)
+        self.Y = self.dataframe[column_name]
+        autolog("Label Seperated successfully")
+        return self.X, self.Y
 
-    def imputeNanvalues(self):
+    def isnullPresent(self,data,path):
+        autolog("checking for null values started")
+        self.null_present = False
+        #null_present = False
+        null_count = data.isna().sum()
+        for i in null_count:
+            if i>0:
+                self.null_present = True
+                break
+        if (self.null_present):
+            dataframe = pandas.DataFrame()
+            dataframe['columns'] = data.columns
+            dataframe["missing values count"] = numpy.asarray(data.isna().sum())
+        dataframe.to_csv(f"{path}/null.csv")
+        autolog("Checking for null values completed...")
+        return self.null_present
+
+
+    def imputeNanvalues(self,data):
         autolog("Imputing NaN values started")
         imputer = KNNImputer(n_neighbors=3,weights='uniform', missing_values=nan)
-        np_array = imputer.fit_transform(self.dataframe)
+        np_array = imputer.fit_transform(data)
         
         autolog("NaN Values imputation completed successfully")
 
         autolog("Starting array conversion to dataframe")
-        self.new_dataframe = pandas.DataFrame(data = numpy.round(np_array), columns=self.dataframe.columns)
+        self.new_dataframe = pandas.DataFrame(data = numpy.round(np_array), columns=data.columns)
         autolog("Array to dataframe conversion completed successfully")
+        return self.new_dataframe
 
-    def applyingLogTransformation(self):
-        autolog("Log Transformation Started")
-        columns = ['age','tsh','t3','tt4','t4u','fti']
-        for column in columns:
-            self.new_dataframe[column] = numpy.log(1 + self.new_dataframe[column])
-        self.new_dataframe.drop(columns='tsh',inplace=True)
-        autolog("Dropped TSH column") 
-        autolog("Log Transformation Completed")
+    # def applyingLogTransformation(self):
+    #     autolog("Log Transformation Started")
+    #     columns = ['age','tsh','t3','tt4','t4u','fti']
+    #     for column in columns:
+    #         self.new_dataframe[column] = numpy.log(1 + self.new_dataframe[column])
+    #     self.new_dataframe.drop(columns='tsh',inplace=True)
+    #     autolog("Dropped TSH column") 
+    #     autolog("Log Transformation Completed")
             
-    def resampleData(self):
-        x = self.new_dataframe.drop(['class'],axis=1)
-        y = self.new_dataframe['class']
+    def resampleData(self,X,Y):
+        autolog("Resampling of data staryed")
         rdsmple = RandomOverSampler()
-        x_sampled,y_sampled  = rdsmple.fit_resample(x,y)
-        self.resampled_dataframe = pandas.DataFrame(data = x_sampled, columns = x.columns)
+        x_sampled,y_sampled  = rdsmple.fit_resample(X,Y)
+        self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns)
+        autolog("Resampling of data completed..")
+        return x_sampled,y_sampled
 
-    def exportCsv(self, path):
-        self.resampled_dataframe.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
+    def exportCsv(self,data,path):
+        data.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
 
     
 if __name__ == '__main__':
@@ -126,10 +150,17 @@ if __name__ == '__main__':
     prp.createPreprocessedDirectory()
     prp.dropUnnecessaryColumns()
     prp.replaceWithNan()
-    prp.mappingCategoricalColumns()
-    prp.getDummies()
-    prp.labelEncoding()
-    prp.imputeNanvalues()
-    prp.applyingLogTransformation()
-    prp.resampleData()
-    prp.exportCsv(prp.preprocessedTrainCsv)
+    prp.encodingCategoricalColumnsTraining()
+    X,Y = prp.seperateLabelfeature('class')
+    is_null_present = prp.isnullPresent(X,prp.preprocessedNullCsv)
+    print(is_null_present)
+    if (is_null_present):
+        X = prp.imputeNanvalues(X)
+    X,Y = prp.resampleData(X,Y)
+    X.to_csv("src/x.csv",index=None,header=True)
+    #prp.exportCsv(prp.preprocessedTrainCsv)
+    k_means = Kmeansclustering()
+    number_of_clusters = k_means.elbowplot(X)
+    X = k_means.create_clusters(X,number_of_clusters)
+    #print(number_of_clusters)
+    prp.exportCsv(X, prp.preprocessedTrainCsv)
