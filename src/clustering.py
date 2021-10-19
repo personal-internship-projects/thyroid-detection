@@ -12,16 +12,17 @@ class Kmeansclustering:
 
     def elbowplot(self,data):
         wcss = []
-        for i in range(1,11):
+        n = 25
+        for i in range(1,n):
             kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
             kmeans.fit(data)
             wcss.append(kmeans.inertia_)
-        plt.plot(range(1,11),wcss) # creating the graph between WCSS and the number of clusters
+        plt.plot(range(1,n),wcss,'bx-') # creating the graph between WCSS and the number of clusters
         plt.title('The Elbow Method')
         plt.xlabel('Number of clusters')
         plt.ylabel('WCSS')
         plt.savefig('src/dataset/preprocessed/K-Means_Elbow.PNG')
-        self.kn = KneeLocator(range(1, 11), wcss, curve='convex', direction='decreasing')
+        self.kn = KneeLocator(range(1,n), wcss, curve='convex', direction='decreasing')
         print(wcss)
         return self.kn.knee
 
@@ -36,6 +37,7 @@ class Kmeansclustering:
             pickle.dump(self.kmeans, file)
         
         self.data['Cluster'] = self.y_kmeans
+
         autolog("Clustering Complered")
         return self.data
 
