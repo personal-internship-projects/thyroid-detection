@@ -81,12 +81,30 @@ class Preprocessing():
 
         with open(f"{self.modelsDirs}/encoder.pkl", 'wb') as file:
          pickle.dump(labelencoding, file)
-        
-    def seperateLabelfeature(self,column_name):
-        self.X = self.dataframe.drop(columns = column_name)
-        self.Y = self.dataframe[column_name]
-        autolog("Label Seperated successfully")
-        return self.X, self.Y
+    
+    def encodingCategoricalColumnsPrediction(self):
+        autolog("Mapping started for categorical columns")
+        self.dataframe['sex'] = self.dataframe['sex'].map({'F':0 , 'M':1})
+        autolog("Mapping for sex column completed")
+
+        for column in self.dataframe.columns:
+            if  len(self.dataframe[column].unique())==2:
+                self.dataframe[column] = self.dataframe[column].map({'f' : 0, 't' : 1})
+        autolog("Mapping for columns with only 2 unique values completed")
+
+        autolog("Mapping completed")
+
+        self.dataframe = get_dummies(self.dataframe, columns=['referral_source'])
+        autolog("Applied dummies for referral_source column completed")
+    
+    def applyingLogTransformation(self):
+        autolog("Log Transformation Started")
+        columns = ['age','tsh','t3','tt4','t4u','fti']
+        for column in columns:
+            self.dataframe[column] = numpy.round(numpy.log(1 + self.dataframe[column]),2)
+        self.dataframe.drop(columns='tsh',inplace=True)
+        autolog("Dropped TSH column") 
+        autolog("Log Transformation Completed")
 
     def isnullPresent(self,data,path):
         autolog("checking for null values started")
@@ -104,6 +122,13 @@ class Preprocessing():
         dataframe.to_csv(f"{path}/null.csv")
         autolog("Checking for null values completed...")
         return self.null_present
+        
+    def seperateLabelfeature(self,column_name):
+        self.X = self.dataframe.drop(columns = column_name)
+        self.Y = self.dataframe[column_name]
+        autolog("Label Seperated successfully")
+        return self.X, self.Y
+
 
 
     def imputeNanvalues(self,data):
@@ -118,14 +143,6 @@ class Preprocessing():
         autolog("Array to dataframe conversion completed successfully")
         return self.new_dataframe
 
-    # def applyingLogTransformation(self):
-    #     autolog("Log Transformation Started")
-    #     columns = ['age','tsh','t3','tt4','t4u','fti']
-    #     for column in columns:
-    #         self.new_dataframe[column] = numpy.log(1 + self.new_dataframe[column])
-    #     self.new_dataframe.drop(columns='tsh',inplace=True)
-    #     autolog("Dropped TSH column") 
-    #     autolog("Log Transformation Completed")
             
     def resampleData(self,X,Y):
         autolog("Resampling of data staryed")
@@ -140,27 +157,53 @@ class Preprocessing():
 
     
 if __name__ == '__main__':
+    # importing database operations class
     from src.database_operations import CassandraOperations
+    #created obejct for database class
     ops = CassandraOperations()
+    #Intialized Connection to database
     ops.databaseConnection()
+    #Fetching data from database
     ops.fetch(ops.combinedTrain, "train",  ops.schemaPath)
-
+    #Importing preprocessing class
     prp = Preprocessing()
+    #Reading csv from the path
     prp.readCsv(prp.trainCsv)
+    #Creating directory for data after preprocessing
     prp.createPreprocessedDirectory()
+    #Dropping unnecessary columns
     prp.dropUnnecessaryColumns()
+    #Replacing '?' values with NaN 
     prp.replaceWithNan()
+    # Handling categorical features and  converting categorical features to numerical
     prp.encodingCategoricalColumnsTraining()
-    X,Y = prp.seperateLabelfeature('class')
-    is_null_present = prp.isnullPresent(X,prp.preprocessedNullCsv)
+    #Scaling the data to handle skewness of the dataset and dropping useless column "TSH"
+    prp.applyingLogTransformation()
+    #Checking for null in dataset
+    is_null_present = prp.isnullPresent(prp.dataframe,prp.preprocessedNullCsv)
     print(is_null_present)
+    #If null present then replace NaN with values predicted by KNN algorithm 
     if (is_null_present):
-        X = prp.imputeNanvalues(X)
+        prp.dataframe = prp.imputeNanvalues(prp.dataframe)
+    # seperating label and features columns
+    X,Y = prp.seperateLabelfeature('class')
+    # HAndling Imbalanced dataset
     X,Y = prp.resampleData(X,Y)
-    X.to_csv("src/x.csv",index=None,header=True)
-    #prp.exportCsv(prp.preprocessedTrainCsv)
+    #Creating obj for Kmeans clustering class
     k_means = Kmeansclustering()
+    #Getting the optimal values of k for kmeans clustering using elbowplot
     number_of_clusters = k_means.elbowplot(X)
-    X = k_means.create_clusters(X,number_of_clusters)
-    #print(number_of_clusters)
-    prp.exportCsv(X, prp.preprocessedTrainCsv)
+    #Creating clusters for each datapoint
+    X_clusters = k_means.create_clusters(X,number_of_clusters)
+    autolog(f"number of clusters are: {number_of_clusters}")
+    #Exporting the dataset for self reference
+    df12 = X_clusters.join(Y)
+    autolog("start")
+    prp.exportCsv(df12, prp.preprocessedTrainCsv)
+    autolog("finished")
+    # from sklearn.metrics import silhouette_samples, silhouette_score
+    # silhouette_avg = silhouette_score(X, X_clusters['Cluster'])
+    # print("************************************")
+    # print(number_of_clusters)
+    # print(silhouette_avg)
+    # print("************************************")
