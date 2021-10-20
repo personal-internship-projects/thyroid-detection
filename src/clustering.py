@@ -2,13 +2,14 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from kneed import KneeLocator
 import pickle
+from src.model_operations import saveModel
 
 from src.logger.auto_logger import autolog
 
 class Kmeansclustering:
 
     def __init__(self):
-        self.modelsDirs             = "src/models"
+        self.modelsDirs    = "src/models/kmeans-clustering.pkl"
 
     def elbowplot(self,data):
         wcss = []
@@ -32,11 +33,14 @@ class Kmeansclustering:
         self.data = data
         autolog("Clustering started")
         self.kmeans      = KMeans(n_clusters=number_of_clusters, init='k-means++', random_state=42)
-        self.y_kmeans    = self.kmeans.fit_predict(data)
-        with open(f"{self.modelsDirs}/kmeans-clustering.pkl", 'wb') as file:
-            pickle.dump(self.kmeans, file)
+        self.kmeans.fit(data)
+        self.y_kmeans    = self.kmeans.predict(data)
+        path             = self.modelsDirs 
+        
+        saveModel(path, self.kmeans)
         
         self.data['Cluster'] = self.y_kmeans
+        
 
         autolog("Clustering Complered")
         return self.data
