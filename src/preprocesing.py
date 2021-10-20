@@ -10,6 +10,8 @@ from src.logger.auto_logger import autolog
 from os.path import isdir
 from os import makedirs
 from src.clustering import Kmeansclustering
+from src.model_operations import saveModel
+
 
 class Preprocessing():
     
@@ -79,9 +81,9 @@ class Preprocessing():
         self.dataframe['class'] =lblEn.transform(self.dataframe['class'])
         autolog("Label Encoding completed successfully.")
 
-        with open(f"{self.modelsDirs}/encoder.pkl", 'wb') as file:
-         pickle.dump(labelencoding, file)
-    
+        path = f"{self.modelsDirs}/encoder.pkl"
+        saveModel(path, lblEn)
+
     def encodingCategoricalColumnsPrediction(self):
         autolog("Mapping started for categorical columns")
         self.dataframe['sex'] = self.dataframe['sex'].map({'F':0 , 'M':1})
@@ -151,6 +153,7 @@ class Preprocessing():
         self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns)
         autolog("Resampling of data completed..")
         return x_sampled,y_sampled
+
 
     def exportCsv(self,data,path):
         data.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
