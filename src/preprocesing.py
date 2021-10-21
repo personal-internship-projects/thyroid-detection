@@ -3,12 +3,14 @@ from pandas import read_csv,get_dummies
 from numpy import nan
 import pandas
 import pickle
+from pandas.core.frame import DataFrame
+from scipy.sparse.construct import random
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import KNNImputer
 from imblearn.over_sampling import RandomOverSampler
 from src.logger.auto_logger import autolog
 from os.path import isdir
-from os import makedirs
+from os import makedirs, read
 from src.clustering import Kmeansclustering
 from src.model_operations import saveModel
 
@@ -146,14 +148,16 @@ class Preprocessing():
         return self.new_dataframe
 
             
-    def resampleData(self,X,Y):
+    def resampleData(self,path,X,Y):
         autolog("Resampling of data staryed")
-        rdsmple = RandomOverSampler()
+        rdsmple = RandomOverSampler(random_state=42)
         x_sampled,y_sampled  = rdsmple.fit_resample(X,Y)
-        self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns)
+        self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns, index=None)
+        #self.resampled_dataframe.to_csv("/home/gamer/Downloads/ffff.csv")    
+        x_sampled.to_csv(f"{path}/preprocessed_X.csv", index=None, header=True)
+        y_sampled.to_csv(f"{path}/preprocessed_Y.csv", index=None, header=True)
         autolog("Resampling of data completed..")
-        return x_sampled,y_sampled
-
+        return  read_csv(f"{path}/preprocessed_X.csv"), read_csv(f"{path}/preprocessed_Y.csv")
 
     def exportCsv(self,data,path):
         data.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
@@ -161,14 +165,14 @@ class Preprocessing():
     
 if __name__ == '__main__':
     # importing database operations class
-    from src.database_operations import CassandraOperations
+    """from src.database_operations import CassandraOperations
     #created obejct for database class
     ops = CassandraOperations()
     #Intialized Connection to database
     ops.databaseConnection()
     #Fetching data from database
     ops.fetch(ops.combinedTrain, "train",  ops.schemaPath)
-    #Importing preprocessing class
+   """ #Importing preprocessing class
     prp = Preprocessing()
     #Reading csv from the path
     prp.readCsv(prp.trainCsv)
@@ -191,20 +195,24 @@ if __name__ == '__main__':
     # seperating label and features columns
     X,Y = prp.seperateLabelfeature('class')
     # HAndling Imbalanced dataset
-    X,Y = prp.resampleData(X,Y)
+    X,Y = prp.resampleData(prp.preprocessedTrainCsv,X,Y)
+    
     #Creating obj for Kmeans clustering class
     k_means = Kmeansclustering()
     #Getting the optimal values of k for kmeans clustering using elbowplot
-    number_of_clusters = k_means.elbowplot(X)
+    #number_of_clusters = k_means.elbowplot(X)
     #Creating clusters for each datapoint
-    X_clusters = k_means.create_clusters(X,number_of_clusters)
-    autolog(f"number of clusters are: {number_of_clusters}")
+    #X.to_csv("/home/gamer/Downloads/fff.csv")
+  #  X = read_csv("/home/gamer/Downloads/ff.csv")
+
+    X_clusters = k_means.create_clusters(X)
+    #autolog(f"number of clusters are: {number_of_clusters}")
     #Exporting the dataset for self reference
-    df12 = X_clusters.join(Y)
+    """df12 = X_clusters.join(Y)
     autolog("start")
     prp.exportCsv(df12, prp.preprocessedTrainCsv)
     autolog("finished")
-    # from sklearn.metrics import silhouette_samples, silhouette_score
+    """#from sklearn.metrics import silhouette_samples, silhouette_score
     # silhouette_avg = silhouette_score(X, X_clusters['Cluster'])
     # print("************************************")
     # print(number_of_clusters)
