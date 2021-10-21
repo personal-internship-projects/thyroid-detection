@@ -11,10 +11,12 @@ import pandas as pd
 import json
 import configparser
 from shutil import rmtree
+import logging
 
 #from src.ttp import pandas_factory
 class CassandraOperations:
     def __init__(self):
+        logging.getLogger('cassandra').setLevel(logging.ERROR)
         self.dbpath                =  "src/DATABASE_OPERATIONS"
         self.schemaPath            =  "src/schema_training.json" 
         self.schemaPathPredict     =  "src/schema_predict.json"
@@ -26,7 +28,7 @@ class CassandraOperations:
         self.combinedTrain         =  "src/dataset/combined_csv/train"
         self.combinedTest          =  "src/dataset/combined_csv/test"
         self.combinedPredict       =  "src/dataset/combined_csv/predict"
-        self.keyspace_name         =  "ineuron"
+        self.keyspace_name         =  "ineuron" 
 
     def createPreprocessedCsvDirectory(self, combinedDirectoryLocation):
         autolog("Creating Directory for combined csv ...")
@@ -72,6 +74,8 @@ class CassandraOperations:
 
             auth_provider = PlainTextAuthProvider("zHTNaJwOaGDlFozNJEabKnoZ", "s4XthkziU7Av8QLU+YI_MHXYZIds_uR7tphlkkFe1XDB+r+k8DzmG8G+rqbPCXZ2_QLc,NtZEjYKnSHMeAz9C8W,WJ-MapEYZ,j9kufqSU_MYQGt8KP5K2lQPJp-w8Kx")
             cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
+            
+
             self.session = cluster.connect()
             autolog("Connection started sucessfully.")
         except ConnectionError:
