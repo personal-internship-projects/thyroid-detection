@@ -50,7 +50,7 @@ class Kmeansclustering:
 
     def scores_clustering(self):
         mycenters = pd.DataFrame({'No.of_Clusters' : self.n, 'WSS' : self.wcss, 'Silhouette_score': self.s_score})
-        mycenters.to_csv("G:\\THYROID DETECTION\\thyroid-detection\\src\\scores.csv",index=None,header=True)
+        mycenters.to_csv("scores.csv",index=None,header=True)
 
     def create_clusters(self,data,number_of_clusters):
         self.data = data

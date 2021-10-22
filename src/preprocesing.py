@@ -50,7 +50,7 @@ class Preprocessing():
 
     def dropUnnecessaryColumns(self):
         self.dataframe.drop(columns="id",inplace=True)
-        self.dataframe.drop(['tsh_measured','t3_measured','tt4_measured','t4u_measured','fti_measured','tbg_measured','tbg'],axis =1,inplace=True)
+        self.dataframe.drop(['tsh','tsh_measured','t3_measured','tt4_measured','t4u_measured','fti_measured','tbg_measured','tbg'],axis =1,inplace=True)
         autolog("Dropped UnnecessaryColumns")
     
 
@@ -101,14 +101,6 @@ class Preprocessing():
         self.dataframe = get_dummies(self.dataframe, columns=['referral_source'])
         autolog("Applied dummies for referral_source column completed")
     
-    def applyingLogTransformation(self):
-        autolog("Log Transformation Started")
-        columns = ['age','tsh','t3','tt4','t4u','fti']
-        for column in columns:
-            self.dataframe[column] = numpy.round(numpy.log(1 + self.dataframe[column]),4)
-        self.dataframe.drop(columns='tsh',inplace=True)
-        autolog("Dropped TSH column") 
-        autolog("Log Transformation Completed")
 
     def isnullPresent(self,data,path):
         autolog("checking for null values started")
@@ -126,13 +118,6 @@ class Preprocessing():
         dataframe.to_csv(f"{path}/null.csv")
         autolog("Checking for null values completed...")
         return self.null_present
-        
-    def seperateLabelfeature(self,column_name):
-        self.X = self.dataframe.drop(columns = column_name)
-        self.Y = self.dataframe[column_name]
-        autolog("Label Seperated successfully")
-        return self.X, self.Y
-
 
 
     def imputeNanvalues(self,data):
@@ -143,9 +128,49 @@ class Preprocessing():
         autolog("NaN Values imputation completed successfully")
 
         autolog("Starting array conversion to dataframe")
-        self.new_dataframe = pandas.DataFrame(data = numpy.round(np_array), columns=data.columns)
+        self.dataframe = pandas.DataFrame(data = numpy.round(np_array, 4), columns=data.columns)
+        self.dataframe.to_csv("gg.csv", index=None)
         autolog("Array to dataframe conversion completed successfully")
-        return self.new_dataframe
+
+
+    def removeOutlier(self):
+        outColumns = {"age": .9995, "tt4":""}
+
+        df = self.dataframe.copy()
+
+        q = df['age'].quantile(.9995)
+        df_new = df[df['age'] < q]
+        print(f"age: {df_new}")
+
+        q = df_new['tt4'].quantile(.95)
+        df_new = df_new[df['tt4'] < q]
+
+        q = df_new['tt4'].quantile(.014)
+        df_new = df_new[df['tt4'] > q]
+
+        q = df_new['fti'].quantile(.95)
+        df_new = df_new[df['fti'] < q]
+
+        q = df_new['fti'].quantile(.01)
+        df_new = df_new[df['fti'] > q]
+
+        q = df_new['t3'].quantile(.98)
+        df_new = df_new[df['t3'] < q]
+
+        q = df_new['t3'].quantile(.008) 
+        df_new = df_new[df['t3'] > q]
+
+        q = df_new['t4u'].quantile(.985)
+        df_new = df_new[df['t4u'] < q]
+
+        self.dataframe = df_new.copy()
+
+
+    def seperateLabelfeature(self,column_name):
+        self.X = self.dataframe.drop(columns = column_name)
+        self.Y = self.dataframe[column_name]
+        autolog("Label Seperated successfully")
+        return self.X, self.Y
 
             
     def resampleData(self,path,X,Y):
@@ -185,15 +210,18 @@ if __name__ == '__main__':
     # Handling categorical features and  converting categorical features to numerical
     prp.encodingCategoricalColumnsTraining()
     #Scaling the data to handle skewness of the dataset and dropping useless column "TSH"
-    prp.applyingLogTransformation()
+   # prp.applyingLogTransformation()
     #Checking for null in dataset
     is_null_present = prp.isnullPresent(prp.dataframe,prp.preprocessedNullCsv)
     print(is_null_present)
     #If null present then replace NaN with values predicted by KNN algorithm 
     if (is_null_present):
-        prp.dataframe = prp.imputeNanvalues(prp.dataframe)
+        prp.imputeNanvalues(prp.dataframe)
+    
+    prp.removeOutlier()
     # seperating label and features columns
     X,Y = prp.seperateLabelfeature('class')
+    print(Y.unique())
     # HAndling Imbalanced dataset
     X,Y = prp.resampleData(prp.preprocessedTrainCsv,X,Y)
     
