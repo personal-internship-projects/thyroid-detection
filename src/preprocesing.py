@@ -210,7 +210,6 @@ if __name__ == '__main__':
     # Handling categorical features and  converting categorical features to numerical
     prp.encodingCategoricalColumnsTraining()
     #Scaling the data to handle skewness of the dataset and dropping useless column "TSH"
-   # prp.applyingLogTransformation()
     #Checking for null in dataset
     is_null_present = prp.isnullPresent(prp.dataframe,prp.preprocessedNullCsv)
     print(is_null_present)
