@@ -105,7 +105,7 @@ class Preprocessing():
         autolog("Log Transformation Started")
         columns = ['age','tsh','t3','tt4','t4u','fti']
         for column in columns:
-            self.dataframe[column] = numpy.round(numpy.log(1 + self.dataframe[column]),2)
+            self.dataframe[column] = numpy.round(numpy.log(1 + self.dataframe[column]),4)
         self.dataframe.drop(columns='tsh',inplace=True)
         autolog("Dropped TSH column") 
         autolog("Log Transformation Completed")
@@ -200,12 +200,13 @@ if __name__ == '__main__':
     #Creating obj for Kmeans clustering class
     k_means = Kmeansclustering()
     #Getting the optimal values of k for kmeans clustering using elbowplot
-    #number_of_clusters = k_means.elbowplot(X)
+    number_of_clusters = k_means.elbowplot(X)
     #Creating clusters for each datapoint
     #X.to_csv("/home/gamer/Downloads/fff.csv")
   #  X = read_csv("/home/gamer/Downloads/ff.csv")
-
-    X_clusters = k_means.create_clusters(X)
+    k_means.silhoutee_scores(X)
+    k_means.scores_clustering()
+    X_clusters = k_means.create_clusters(X,number_of_clusters)
     #autolog(f"number of clusters are: {number_of_clusters}")
     #Exporting the dataset for self reference
     """df12 = X_clusters.join(Y)
