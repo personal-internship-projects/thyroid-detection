@@ -5,7 +5,7 @@ import pandas
 import pickle
 from pandas.core.frame import DataFrame
 from scipy.sparse.construct import random
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.impute import KNNImputer
 from imblearn.over_sampling import RandomOverSampler
 from src.logger.auto_logger import autolog
@@ -165,14 +165,18 @@ class Preprocessing():
 
         self.dataframe = df_new.copy()
 
-
     def seperateLabelfeature(self,column_name):
         self.X = self.dataframe.drop(columns = column_name)
         self.Y = self.dataframe[column_name]
         autolog("Label Seperated successfully")
         return self.X, self.Y
 
-            
+    def applyStandardScaler(self, data):
+        obj = StandardScaler()
+        dataFrame = pandas.DataFrame(obj.fit_transform(data), columns=data.columns)
+        return dataFrame
+
+
     def resampleData(self,path,X,Y):
         autolog("Resampling of data staryed")
         rdsmple = RandomOverSampler(random_state=42)
@@ -221,6 +225,7 @@ if __name__ == '__main__':
     # seperating label and features columns
     X,Y = prp.seperateLabelfeature('class')
     print(Y.unique())
+    X = prp.applyStandardScaler(X)
     # HAndling Imbalanced dataset
     X,Y = prp.resampleData(prp.preprocessedTrainCsv,X,Y)
     
