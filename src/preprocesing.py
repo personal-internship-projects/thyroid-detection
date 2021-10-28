@@ -3,9 +3,7 @@ from pandas import read_csv,get_dummies
 from numpy import nan
 import pandas
 import pickle
-from pandas.core.frame import DataFrame
-from scipy.sparse.construct import random
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder, QuantileTransformer
 from sklearn.impute import KNNImputer
 from imblearn.over_sampling import RandomOverSampler
 from src.logger.auto_logger import autolog
@@ -133,48 +131,50 @@ class Preprocessing():
         autolog("Array to dataframe conversion completed successfully")
 
 
-    def removeOutlier(self):
+    def removeOutlier(self, df):
         outColumns = {"age": .9995, "tt4":""}
 
-        df = self.dataframe.copy()
+        q = df['age'].quantile(.01)
+        df_new = df[df['age'] > q]
 
         q = df['age'].quantile(.9995)
         df_new = df[df['age'] < q]
         print(f"age: {df_new}")
 
-        q = df_new['tt4'].quantile(.95)
+        q = df_new['tt4'].quantile(.98)
         df_new = df_new[df['tt4'] < q]
 
-        q = df_new['tt4'].quantile(.014)
-        df_new = df_new[df['tt4'] > q]
-
-        q = df_new['fti'].quantile(.95)
+        q = df_new['fti'].quantile(.96)
         df_new = df_new[df['fti'] < q]
 
-        q = df_new['fti'].quantile(.01)
-        df_new = df_new[df['fti'] > q]
-
-        q = df_new['t3'].quantile(.98)
+        q = df_new['t3'].quantile(.99)
         df_new = df_new[df['t3'] < q]
 
-        q = df_new['t3'].quantile(.008) 
-        df_new = df_new[df['t3'] > q]
-
-        q = df_new['t4u'].quantile(.985)
+        q = df_new['t4u'].quantile(.92)
         df_new = df_new[df['t4u'] < q]
 
+        q = df_new['t4u'].quantile(.00245)
+        df_new = df_new[df['t4u'] > q]
+
+
+        i = df_new[df_new['tt4']==-5.199337582605575].index
+        df_new.drop(i,inplace=True)
+
+        i = df_new[df_new['t3']==-5.199337582605575].index
+        df_new.drop(i,inplace=True)
+
+        i = df_new[df_new['age']==3.09400722556956].index
+        df_new.drop(i,inplace=True)
+
+
         self.dataframe = df_new.copy()
+
 
     def seperateLabelfeature(self,column_name):
         self.X = self.dataframe.drop(columns = column_name)
         self.Y = self.dataframe[column_name]
         autolog("Label Seperated successfully")
         return self.X, self.Y
-
-    def applyStandardScaler(self, data):
-        obj = StandardScaler()
-        dataFrame = pandas.DataFrame(obj.fit_transform(data), columns=data.columns)
-        return dataFrame
 
 
     def resampleData(self,path,X,Y):
@@ -183,10 +183,21 @@ class Preprocessing():
         x_sampled,y_sampled  = rdsmple.fit_resample(X,Y)
         self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns, index=None)
         #self.resampled_dataframe.to_csv("/home/gamer/Downloads/ffff.csv")    
-        x_sampled.to_csv(f"{path}/preprocessed_X.csv", index=None, header=True)
-        y_sampled.to_csv(f"{path}/preprocessed_Y.csv", index=None, header=True)
+        
+        ## for checking if data is properly resampled or not
+        
+        #x_sampled.to_csv(f"{path}/preprocessed_X.csv", index=None, header=True)
+        #y_sampled.to_csv(f"{path}/preprocessed_Y.csv", index=None, header=True)
         autolog("Resampling of data completed..")
         return  read_csv(f"{path}/preprocessed_X.csv"), read_csv(f"{path}/preprocessed_Y.csv")
+
+
+    def applyStandardScaler(self, data):
+        scaler = QuantileTransformer(output_distribution='normal')
+        data[['age','t3','tt4','t4u','fti']] = pandas.DataFrame(scaler.fit_transform(data[['age','t3','tt4','t4u','fti']]))
+        print(data)
+        return data
+
 
     def exportCsv(self,data,path):
         data.to_csv(f"{path}/preprocessed.csv", index=None, header=True)
