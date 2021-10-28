@@ -16,7 +16,6 @@ import logging
 #from src.ttp import pandas_factory
 class CassandraOperations:
     def __init__(self):
-        logging.getLogger('cassandra').setLevel(logging.ERROR)
         self.dbpath                =  "src/DATABASE_OPERATIONS"
         self.schemaPath            =  "src/schema_training.json" 
         self.schemaPathPredict     =  "src/schema_predict.json"
