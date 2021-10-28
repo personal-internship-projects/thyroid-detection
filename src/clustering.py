@@ -4,14 +4,16 @@ from kneed import KneeLocator
 import pickle
 import pandas as pd
 from src.model_operations import saveModel
-from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.metrics import silhouette_score
 from src.logger.auto_logger import autolog
+import logging
 
 class Kmeansclustering:
 
     def __init__(self):
         self.modelsDirs    = "src/models/kmeans-clustering.pkl"
-        
+        logging.getLogger('matplotlib').setLevel(logging.ERROR)
+
 
     def elbowplot(self,data):
         self.wcss = []
