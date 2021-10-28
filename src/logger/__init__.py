@@ -16,6 +16,6 @@ format_var = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messa
 logging.basicConfig(filename=log_path, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 
 console_log = logging.StreamHandler()
-console_log.setLevel(logging.DEBUG)
+console_log.setLevel(logging.INFO)
 console_log.setFormatter(format_var)
 logging.getLogger("").addHandler(console_log)
