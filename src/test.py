@@ -18,7 +18,7 @@ pre.readCsv(pre.testCsv)
 pre.dropUnnecessaryColumns()
 pre.replaceWithNan()
 pre.encodingCategoricalColumnsPrediction()
-pre.applyingLogTransformation()
+
 is_null_present = prp.isnullPresent(prp.dataframe,prp.preprocessedNullCsv)
 
 if (is_null_present):
