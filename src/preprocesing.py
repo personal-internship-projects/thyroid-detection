@@ -137,24 +137,24 @@ class Preprocessing():
         q = df['age'].quantile(.01)
         df_new = df[df['age'] > q]
 
-        q = df['age'].quantile(.9995)
-        df_new = df[df['age'] < q]
+        q = df_new['age'].quantile(.9995)
+        df_new = df_new[df_new['age'] < q]
         print(f"age: {df_new}")
 
         q = df_new['tt4'].quantile(.98)
-        df_new = df_new[df['tt4'] < q]
+        df_new = df_new[df_new['tt4'] < q]
 
         q = df_new['fti'].quantile(.96)
-        df_new = df_new[df['fti'] < q]
+        df_new = df_new[df_new['fti'] < q]
 
         q = df_new['t3'].quantile(.99)
-        df_new = df_new[df['t3'] < q]
+        df_new = df_new[df_new['t3'] < q]
 
         q = df_new['t4u'].quantile(.92)
-        df_new = df_new[df['t4u'] < q]
+        df_new = df_new[df_new['t4u'] < q]
 
         q = df_new['t4u'].quantile(.00245)
-        df_new = df_new[df['t4u'] > q]
+        df_new = df_new[df_new['t4u'] > q]
 
 
         i = df_new[df_new['tt4']==-5.199337582605575].index
