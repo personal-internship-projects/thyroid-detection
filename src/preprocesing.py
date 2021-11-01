@@ -132,7 +132,7 @@ class Preprocessing():
 
 
     def removeOutlier(self, df):
-        outColumns = {"age": .9995, "tt4":""}
+        #outColumns = {"age": .9995, "tt4":""}
 
         q = df['age'].quantile(.01)
         df_new = df[df['age'] > q]
@@ -195,6 +195,7 @@ class Preprocessing():
     def applyStandardScaler(self, data):
         scaler = QuantileTransformer(output_distribution='normal')
         data[['age','t3','tt4','t4u','fti']] = pandas.DataFrame(scaler.fit_transform(data[['age','t3','tt4','t4u','fti']]))
+        saveModel(f"{self.modelsDirs}/scaler.pkl", scaler)
         print(data)
         return data
 
