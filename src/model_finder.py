@@ -154,13 +154,13 @@ class ModelFinder:
                 autolog("Comparing the models")
                 if self.knn_score > self.dtc_score and self.knn_score > self.rfc_score:
                     autolog("KNN Classifier is the best model")
-                    return self.knn
+                    return "KNN",self.knn
                 elif self.dtc_score > self.knn_score and self.dtc_score > self.rfc_score:
                     autolog("Decision Tree Classifier is the best model")
-                    return self.dtc
+                    return "DecisionTreeClassifier",self.dtc
                 elif self.rfc_score > self.knn_score and self.rfc_score > self.dtc_score:
                     autolog("Random Forest Classifier is the best model")
-                    return self.rfc
+                    return "RandomForestClassifier",self.rfc
             except Exception as e:
                 autolog("Error in finding best model: {}".format(e))
 
