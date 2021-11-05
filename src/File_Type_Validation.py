@@ -2,32 +2,33 @@ import os
 import shutil
 from src.logger.auto_logger import autolog
 
+
 class File_Type_Validation:
     def __init__(self, path) -> None:
         self.path = path
-        self.goodCsvPath    = self.path+"/csv_operation/GoodCSV"
-        self.badCsvPath     = self.path+"/csv_operation/BadCSV"
+        self.goodCsvPath = self.path+"/csv_operation/GoodCSV"
+        self.badCsvPath = self.path+"/csv_operation/BadCSV"
         self.predictCsvPath = self.path+"/csv_operation/PredictCSV"
 
-    def createCsvDir (self):
+    def createCsvDir(self):
+        """This function creates the directory for the csv files """
 
         autolog("Creating Directory for csv operations ...")
         if not os.path.isdir(self.goodCsvPath):
-            os.makedirs(self.goodCsvPath)  
+            os.makedirs(self.goodCsvPath)
         if not os.path.isdir(self.badCsvPath):
             os.makedirs(self.badCsvPath)
         if not os.path.isdir(self.predictCsvPath):
             os.makedirs(self.predictCsvPath)
-            
+
         autolog("Directories created.")
 
-
     def convertToCsv(self):
+        """This function converts the files to csv files only whose extension is '.data','.test' """
 
         autolog("Renaming required files to csv ...")
-        file_extensions = (".data",".test")
+        file_extensions = (".data", ".test")
         raw_files = f"{self.path}/batches_of_data"
-        
 
         for i in os.listdir(path=raw_files):
             if i.endswith(file_extensions):
@@ -41,7 +42,7 @@ class File_Type_Validation:
                 autolog(f"Copying bad file {i} to {self.badCsvPath}")
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     x = File_Type_Validation("./src/dataset")
     x.createCsvDir()
     x.convertToCsv()
