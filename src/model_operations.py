@@ -1,4 +1,6 @@
 import pickle
+
+import sklearn
 from src.logger.auto_logger import autolog
 
 
@@ -30,11 +32,11 @@ def loadModel(path):
         [model]: [Variable of saved model]
     """
     try:
-        with open(path, 'rb'):
-            model = pickle.load(path)
+        with open(path, 'rb') as md:
+            model = pickle.load(md)
 
         autolog(f"Model loaded successfully.")
         return model
 
     except Exception as e:
-        autolog("An exception occured while loading model.", 3)
+        autolog(f"An exception occured while loading model. {e}", 3)
