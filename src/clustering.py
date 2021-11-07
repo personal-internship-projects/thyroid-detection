@@ -12,6 +12,7 @@ import logging
 class Kmeansclustering:
 
     def __init__(self):
+       
         self.modelsDirs = "src/models/kmeans-clustering.pkl"
         logging.getLogger('matplotlib').setLevel(logging.ERROR)
 
