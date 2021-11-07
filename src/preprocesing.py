@@ -10,7 +10,7 @@ from src.logger.auto_logger import autolog
 from os.path import isdir
 from os import makedirs, read
 from src.clustering import Kmeansclustering
-from src.model_operations import saveModel
+from src.model_operations import loadModel, saveModel
 
 
 class Preprocessing():
@@ -65,10 +65,11 @@ class Preprocessing():
         autolog("Mapping started for categorical columns")
         self.dataframe['sex'] = self.dataframe['sex'].map({'F':0 , 'M':1})
         autolog("Mapping for sex column completed")
-
+        print(self.dataframe.columns)
         for column in self.dataframe.columns:
-            if  len(self.dataframe[column].unique())==2:
+            if  len(self.dataframe[column].unique())<=2:
                 self.dataframe[column] = self.dataframe[column].map({'f' : 0, 't' : 1})
+            
         autolog("Mapping for columns with only 2 unique values completed")
 
         autolog("Mapping completed")
@@ -90,7 +91,7 @@ class Preprocessing():
         autolog("Mapping for sex column completed")
 
         for column in self.dataframe.columns:
-            if  len(self.dataframe[column].unique())==2:
+            if  len(self.dataframe[column].unique())<=2:
                 self.dataframe[column] = self.dataframe[column].map({'f' : 0, 't' : 1})
         autolog("Mapping for columns with only 2 unique values completed")
 
@@ -121,14 +122,22 @@ class Preprocessing():
     def imputeNanvalues(self,data):
         autolog("Imputing NaN values started")
         imputer = KNNImputer(n_neighbors=3,weights='uniform', missing_values=nan)
-        np_array = imputer.fit_transform(data)
+        model  = imputer.fit(data)
+        np_array = model.transform(data)
         
         autolog("NaN Values imputation completed successfully")
 
-        autolog("Starting array conversion to dataframe")
-        self.dataframe = pandas.DataFrame(data = numpy.round(np_array, 4), columns=data.columns)
-        self.dataframe.to_csv("gg.csv", index=None)
-        autolog("Array to dataframe conversion completed successfully")
+        autolog("Saving Imputer model...")
+        saveModel("src/models/Imputer.pkl", model)
+        autolog("Imputer model saved successfully.")
+
+        return pandas.DataFrame(data = numpy.round(np_array, 4), columns=data.columns)
+
+
+    def imputeNaNValuesOnTestAndPredict(self, data):
+        model = loadModel("src/models/Imputer.pkl")
+        imputedData = model.transform(data)
+        return pandas.DataFrame(data = numpy.round(imputedData, 4), columns=data.columns)
 
 
     def removeOutlier(self, df):
@@ -192,12 +201,20 @@ class Preprocessing():
         return  read_csv(f"{path}/preprocessed_X.csv"), read_csv(f"{path}/preprocessed_Y.csv")
 
 
-    def applyStandardScaler(self, data):
+    def quantileTransformer(self, data):
+        """
+
+        Args:
+            data ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         scaler = QuantileTransformer(output_distribution='normal')
         data[['age','t3','tt4','t4u','fti']] = pandas.DataFrame(scaler.fit_transform(data[['age','t3','tt4','t4u','fti']]))
         saveModel(f"{self.modelsDirs}/scaler.pkl", scaler)
         print(data)
-        return data
+        return numpy.round(data, 4)
 
 
     def exportCsv(self,data,path):
@@ -237,7 +254,7 @@ if __name__ == '__main__':
     # seperating label and features columns
     X,Y = prp.seperateLabelfeature('class')
     print(Y.unique())
-    X = prp.applyStandardScaler(X)
+    X = prp.quantileTransformer(X)
     # HAndling Imbalanced dataset
     X,Y = prp.resampleData(prp.preprocessedTrainCsv,X,Y)
     
