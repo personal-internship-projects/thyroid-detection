@@ -8,7 +8,7 @@ from src.logger.auto_logger import autolog
 import src.preprocesing as prp
 from sklearn.model_selection import train_test_split
 
-x = fv.File_Type_Validation("./src/dataset")
+"""x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
 zz =dv.DataValidation()
@@ -26,7 +26,7 @@ db.createPreprocessedCsvDirectory(db.combinedTrain)
 db.deleteTable('train')
 db.createTable('train', db.schemaPath)
 db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
-db.fetch(db.combinedTrain, "train",  db.schemaPath)
+db.fetch(db.combinedTrain, "train",  db.schemaPath)"""
 
 
 pre = prp.Preprocessing()
@@ -37,17 +37,17 @@ pre.replaceWithNan()
 pre.encodingCategoricalColumnsTraining()
 isNullPresent = pre.isnullPresent(pre.dataframe,pre.preprocessedNullCsv)
 
-if (isNullPresent):
-    pre.imputeNanvalues(pre.dataframe)
-
 X_train, Y_train = pre.seperateLabelfeature('class')
+if (isNullPresent):
+    pre.imputeNanvalues(X_train)
+
 X_train, Y_train = pre.resampleData(pre.preprocessedTrainCsv, X_train, Y_train)
 
 ## After resampling data, we are separating X, Y 
 ## for applying quantile transformer
 
 autolog("Applying Quantile Transformer...")
-X_train = pre.applyStandardScaler(X_train)
+X_train = pre.quantileTransformer(X_train)
 autolog("Quantile Transformer applied")
 
 tmp_dataframe = X_train.join(Y_train)
@@ -77,29 +77,24 @@ pre.exportCsv(dfTransport, pre.preprocessedTrainCsv)
 autolog("Done.")
 
 print(numberOfClusters)
+from src import test as t
 
 ## Training started
 
 autolog("Training started.")
-finalDataframe = read_csv(f"{pre.preprocessedTrainCsv}/preprocessed.csv")
-clusterID = finalDataframe['Cluster'].unique()
+finalDataframeTrain = read_csv(f"{pre.preprocessedTrainCsv}/preprocessed.csv")
+finalDataframeTrain = read_csv(f"{pre.preprocessedTestCsv}/preprocessed.csv")
 
-for id in clusterID:
+clusterID = finalDataframeTrain['Cluster'].unique()
+
+"""for id in clusterID:
     
     ## Separating data based on cluster
-    clusterData = finalDataframe[finalDataframe['Cluster'] == id]
-    
+    clusterData     = finalDataframe[finalDataframe['Cluster'] == id]
+    clusterDataTest = 
     ## Prepare the feature and Label columns
     ## clusterFeatuer = X
     ## clusterLabel = Y
     clusterFeature = clusterData.drop(columns=['class', 'Cluster'])
-    clusterLabel = clusterData['class']
-    
-    X_train, X_test, Y_train, Y_test = train_test_split(clusterFeature, clusterLabel, test_size=0.2, random_state=500, stratify=clusterLabel)
-    import numpy as np
-    np.random.seed(42)
-    print(f"Y_Train = {np.unique(Y_train, return_counts=True)}")
-    print(f"Y_Test = {np.unique(Y_test, return_counts=True)}", end="\n\n")
-
-
-    
+    clusterLabel = clusterData['class']    
+   """ 
