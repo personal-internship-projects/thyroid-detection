@@ -18,6 +18,7 @@ class ModelFinder:
         self.knn = KNeighborsClassifier()
 
     def getBestparamsDecisionTree(self):
+        
         try:
             autolog("Initializing with different combination of parameters")
             self.params_dtc = {'criterion': ['gini', 'entropy'],
