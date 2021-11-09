@@ -1,3 +1,4 @@
+from os import read
 from pandas.io.parsers import read_csv
 from sklearn import cluster
 import src.File_Type_Validation as fv
@@ -5,8 +6,10 @@ import src.Data_Validation as dv
 from src.clustering import Kmeansclustering
 import src.database_operations as dboc
 from src.logger.auto_logger import autolog
+from src.model_operations import saveModel
 import src.preprocesing as prp
 from sklearn.model_selection import train_test_split
+from src import model_finder as mf
 
 """x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
@@ -26,10 +29,11 @@ db.createPreprocessedCsvDirectory(db.combinedTrain)
 db.deleteTable('train')
 db.createTable('train', db.schemaPath)
 db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
-db.fetch(db.combinedTrain, "train",  db.schemaPath)"""
+db.fetch(db.combinedTrain, "train",  db.schemaPath)
 
-
+"""
 pre = prp.Preprocessing()
+"""
 pre.createPreprocessedDirectory()
 pre.readCsv(pre.trainCsv)
 pre.dropUnnecessaryColumns()
@@ -78,23 +82,32 @@ autolog("Done.")
 
 print(numberOfClusters)
 from src import test as t
-
+"""
 ## Training started
 
 autolog("Training started.")
 finalDataframeTrain = read_csv(f"{pre.preprocessedTrainCsv}/preprocessed.csv")
-finalDataframeTrain = read_csv(f"{pre.preprocessedTestCsv}/preprocessed.csv")
+finalDataframeTest = read_csv(f"{pre.preprocessedTestCsv}/preprocessed.csv")
 
 clusterID = finalDataframeTrain['Cluster'].unique()
 
-"""for id in clusterID:
+for id in clusterID:
     
     ## Separating data based on cluster
-    clusterData     = finalDataframe[finalDataframe['Cluster'] == id]
-    clusterDataTest = 
+    clusterDataTrain     = finalDataframeTrain[finalDataframeTrain['Cluster'] == id]
+    clusterDataTest = finalDataframeTest[finalDataframeTest['Cluster'] == id]
+    
     ## Prepare the feature and Label columns
-    ## clusterFeatuer = X
-    ## clusterLabel = Y
-    clusterFeature = clusterData.drop(columns=['class', 'Cluster'])
-    clusterLabel = clusterData['class']    
-   """ 
+    clusterFeatureTrain = clusterDataTrain.drop(['class', 'Cluster'], axis=1)
+    clusterLabelTrain = clusterDataTrain['class']
+
+    clusterFeatureTest = clusterDataTest.drop(['class', 'Cluster'], axis=1)
+    clusterLabelTest = clusterDataTest['class']
+
+    model = mf.ModelFinder(clusterDataTrain, clusterLabelTrain, clusterDataTest, clusterLabelTest)
+    model.getBestparamsDecisionTree()
+    model.getBestparamsRandomForest()
+    model.getBestparamsKNN()
+    modelName, predModel = model.getBestModel()
+    saveModel(predModel, f"{pre.modelPath}/{modelName}_{id}.pkl")
+    
