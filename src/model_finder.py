@@ -122,61 +122,61 @@ class ModelFinder:
             autolog(
                 message="Error in finding best parameters for KNN Classifier: {}".format(e))
 
-        def getBestModel(self):
-            autolog("Finding best model")
+    def getBestModel(self):
+        autolog("Finding best model")
 
-            try:
-                self.getBestparamsKNN()
-                self.prediction_knn = self.knn.predict_proba(self.X_test)
+        try:
+            self.getBestparamsKNN()
+            self.prediction_knn = self.knn.predict_proba(self.X_test)
 
-                if len(self.y_test) == 1:
-                    self.knn_score = accuracy_score(
-                        self.y_test, self.prediction_knn)
-                    autolog("Accuracy Score for KNN Classifier: {}".format(
-                        self.knn_score))
-                else:
-                    self.knn_score = roc_auc_score(
-                        self.y_test, self.prediction_knn, multi_class='ovr')
-                    autolog("AUC Score for KNN Classifier: {}".format(
-                        self.knn_score))
+            if len(self.y_test) == 1:
+                self.knn_score = accuracy_score(
+                    self.y_test, self.prediction_knn)
+                autolog("Accuracy Score for KNN Classifier: {}".format(
+                    self.knn_score))
+            else:
+                self.knn_score = roc_auc_score(
+                    self.y_test, self.prediction_knn, multi_class='ovr')
+                autolog("AUC Score for KNN Classifier: {}".format(
+                    self.knn_score))
 
-                self.getBestparamsDecisionTree()
-                self.prediction_dtc = self.dtc.predict_proba(self.X_test)
+            self.getBestparamsDecisionTree()
+            self.prediction_dtc = self.dtc.predict_proba(self.X_test)
 
-                if len(self.y_test) == 1:
-                    self.dtc_score = accuracy_score(
-                        self.y_test, self.prediction_dtc)
-                    autolog("Accuracy Score for Decision Tree Classifier: {}".format(
-                        self.dtc_score))
-                else:
-                    self.dtc_score = roc_auc_score(
-                        self.y_test, self.prediction_dtc, multi_class='ovr')
-                    autolog("AUC Score for Decision Tree Classifier: {}".format(
-                        self.dtc_score))
+            if len(self.y_test) == 1:
+                self.dtc_score = accuracy_score(
+                    self.y_test, self.prediction_dtc)
+                autolog("Accuracy Score for Decision Tree Classifier: {}".format(
+                    self.dtc_score))
+            else:
+                self.dtc_score = roc_auc_score(
+                    self.y_test, self.prediction_dtc, multi_class='ovr')
+                autolog("AUC Score for Decision Tree Classifier: {}".format(
+                    self.dtc_score))
 
-                self.getBestparamsRandomForest()
-                self.prediction_rfc = self.rfc.predict_proba(self.X_test)
+            self.getBestparamsRandomForest()
+            self.prediction_rfc = self.rfc.predict_proba(self.X_test)
 
-                if len(self.y_test) == 1:
-                    self.rfc_score = accuracy_score(
-                        self.y_test, self.rfc.predict(self.X_test))
-                    autolog("Accuracy Score for Random Forest Classifier: {}".format(
-                        self.rfc_score))
-                else:
-                    self.rfc_score = roc_auc_score(
-                        self.y_test, self.prediction_rfc, multi_class='ovr')
-                    autolog("AUC Score for Random Forest Classifier: {}".format(
-                        self.rfc_score))
+            if len(self.y_test) == 1:
+                self.rfc_score = accuracy_score(
+                    self.y_test, self.rfc.predict(self.X_test))
+                autolog("Accuracy Score for Random Forest Classifier: {}".format(
+                    self.rfc_score))
+            else:
+                self.rfc_score = roc_auc_score(
+                    self.y_test, self.prediction_rfc, multi_class='ovr')
+                autolog("AUC Score for Random Forest Classifier: {}".format(
+                    self.rfc_score))
 
-                autolog("Comparing the models")
-                if self.knn_score > self.dtc_score and self.knn_score > self.rfc_score:
-                    autolog("KNN Classifier is the best model")
-                    return "KNN", self.knn
-                elif self.dtc_score > self.knn_score and self.dtc_score > self.rfc_score:
-                    autolog("Decision Tree Classifier is the best model")
-                    return "DecisionTreeClassifier", self.dtc
-                elif self.rfc_score > self.knn_score and self.rfc_score > self.dtc_score:
-                    autolog("Random Forest Classifier is the best model")
-                    return "RandomForestClassifier", self.rfc
-            except Exception as e:
-                autolog("Error in finding best model: {}".format(e))
+            autolog("Comparing the models")
+            if self.knn_score > self.dtc_score and self.knn_score > self.rfc_score:
+                autolog("KNN Classifier is the best model")
+                return "KNN", self.knn
+            elif self.dtc_score > self.knn_score and self.dtc_score > self.rfc_score:
+                autolog("Decision Tree Classifier is the best model")
+                return "DecisionTreeClassifier", self.dtc
+            elif self.rfc_score > self.knn_score and self.rfc_score > self.dtc_score:
+                autolog("Random Forest Classifier is the best model")
+                return "RandomForestClassifier", self.rfc
+        except Exception as e:
+            autolog("Error in finding best model: {}".format(e))
