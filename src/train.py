@@ -11,7 +11,7 @@ import src.preprocesing as prp
 from sklearn.model_selection import train_test_split
 from src import model_finder as mf
 
-"""x = fv.File_Type_Validation("./src/dataset")
+x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
 zz =dv.DataValidation()
@@ -31,9 +31,9 @@ db.createTable('train', db.schemaPath)
 db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
 db.fetch(db.combinedTrain, "train",  db.schemaPath)
 
-"""
+
 pre = prp.Preprocessing()
-"""
+
 pre.createPreprocessedDirectory()
 pre.readCsv(pre.trainCsv)
 pre.dropUnnecessaryColumns()
@@ -82,7 +82,7 @@ autolog("Done.")
 
 print(numberOfClusters)
 from src import test as t
-"""
+
 ## Training started
 
 autolog("Training started.")
