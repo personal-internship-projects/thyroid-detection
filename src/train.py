@@ -11,8 +11,8 @@ import src.preprocesing as prp
 from sklearn.model_selection import train_test_split
 from src import model_finder as mf
 
-"""
-x = fv.File_Type_Validation("./src/dataset")
+
+"""x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
 zz =dv.DataValidation()
@@ -30,8 +30,8 @@ db.createPreprocessedCsvDirectory(db.combinedTrain)
 db.deleteTable('train')
 db.createTable('train', db.schemaPath)
 db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
-db.fetch(db.combinedTrain, "train",  db.schemaPath)
-"""
+db.fetch(db.combinedTrain, "train",  db.schemaPath)"""
+
 
 pre = prp.Preprocessing()
 
@@ -105,7 +105,7 @@ for id in clusterID:
     clusterFeatureTest = clusterDataTest.drop(['class', 'Cluster'], axis=1)
     clusterLabelTest = clusterDataTest['class']
 
-    model = mf.ModelFinder(clusterDataTrain, clusterLabelTrain, clusterDataTest, clusterLabelTest)
+    model = mf.ModelFinder(clusterFeatureTrain, clusterLabelTrain, clusterFeatureTest, clusterLabelTest)
     model.getBestparamsDecisionTree()
     model.getBestparamsRandomForest()
     model.getBestparamsKNN()
