@@ -3,15 +3,15 @@ from src.model_operations import loadModel
 import src.preprocesing as prp
 from src.clustering import Kmeansclustering
 from src.logger.auto_logger import autolog
-'''
-db = dboc.CassandraOperations()
+
+"""db = dboc.CassandraOperations()
 db.databaseConnection()
 db.createPreprocessedCsvDirectory(db.combinedTest)
 db.deleteTable("test")
 db.createTable('test',db.schemaPath)
 db.insertValidatedData(db.finalCsvTest, "test", db.schemaPath)
-db.fetch(db.combinedTest,'test', db.schemaPath)
-'''
+db.fetch(db.combinedTest,'test', db.schemaPath)"""
+
 pre = prp.Preprocessing()
 pre.createPreprocessedDirectory()
 pre.readCsv(pre.testCsv)
