@@ -191,12 +191,13 @@ class Preprocessing():
         rdsmple = RandomOverSampler(random_state=42)
         x_sampled,y_sampled  = rdsmple.fit_resample(X,Y)
         self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns, index=None)
-        #self.resampled_dataframe.to_csv("/home/gamer/Downloads/ffff.csv")    
+        self.resampled_dataframe.to_csv(f"{path}/preprocessed.csv")    
         
         ## for checking if data is properly resampled or not
         
-        #x_sampled.to_csv(f"{path}/preprocessed_X.csv", index=None, header=True)
-        #y_sampled.to_csv(f"{path}/preprocessed_Y.csv", index=None, header=True)
+        x_sampled.to_csv(f"{path}/preprocessed_X.csv", index=None, header=True)
+        y_sampled.to_csv(f"{path}/preprocessed_Y.csv", index=None, header=True)
+
         autolog("Resampling of data completed..")
         return  read_csv(f"{path}/preprocessed_X.csv"), read_csv(f"{path}/preprocessed_Y.csv")
 

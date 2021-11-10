@@ -40,3 +40,4 @@ def loadModel(path):
 
     except Exception as e:
         autolog(f"An exception occured while loading model. {e}", 3)
+        

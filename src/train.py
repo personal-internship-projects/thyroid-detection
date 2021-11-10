@@ -11,6 +11,7 @@ import src.preprocesing as prp
 from sklearn.model_selection import train_test_split
 from src import model_finder as mf
 
+"""
 x = fv.File_Type_Validation("./src/dataset")
 x.createCsvDir()
 x.convertToCsv()
@@ -30,7 +31,7 @@ db.deleteTable('train')
 db.createTable('train', db.schemaPath)
 db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
 db.fetch(db.combinedTrain, "train",  db.schemaPath)
-
+"""
 
 pre = prp.Preprocessing()
 
@@ -43,7 +44,7 @@ isNullPresent = pre.isnullPresent(pre.dataframe,pre.preprocessedNullCsv)
 
 X_train, Y_train = pre.seperateLabelfeature('class')
 if (isNullPresent):
-    pre.imputeNanvalues(X_train)
+    X_train = pre.imputeNanvalues(X_train)
 
 X_train, Y_train = pre.resampleData(pre.preprocessedTrainCsv, X_train, Y_train)
 
