@@ -49,7 +49,7 @@ class ModelFinder:
             autolog("Fitting the model with best parameters")
             self.dtc.fit(self.X_train, self.y_train)
             autolog("Model Fitted....")
-            saveModel(self.dtc, "DecisionTree")
+            saveModel("src/models/dtc.pkl",self.dtc)
 
         except Exception as e:
             autolog(
@@ -85,7 +85,7 @@ class ModelFinder:
             autolog("Fitting the model with best parameters")
             self.rfc.fit(self.X_train, self.y_train)
             autolog("Model Fitted....")
-            saveModel(self.rfc, "RandomForest")
+            saveModel("src/models/rfc.pkl",self.rfc)
 
         except Exception as e:
             autolog(
@@ -120,7 +120,7 @@ class ModelFinder:
             autolog("Fitting the model with best parameters")
             self.knn.fit(self.X_train, self.y_train)
             autolog("Model Fitted....")
-            saveModel(self.knn, "KNN")
+            saveModel("src/models/knn.pkl",self.knn)
 
         except Exception as e:
             autolog(
@@ -130,8 +130,7 @@ class ModelFinder:
         autolog("Finding best model")
 
         try:
-            self.getBestparamsKNN()
-            self.prediction_knn = self.knn.predict_proba(self.X_test)
+            self.prediction_knn = self.knn.predict(self.X_test)
 
             if len(self.y_test) == 1:
                 self.knn_score = accuracy_score(
@@ -144,8 +143,7 @@ class ModelFinder:
                 autolog("AUC Score for KNN Classifier: {}".format(
                     self.knn_score))
 
-            self.getBestparamsDecisionTree()
-            self.prediction_dtc = self.dtc.predict_proba(self.X_test)
+            self.prediction_dtc = self.dtc.predict(self.X_test)
 
             if len(self.y_test) == 1:
                 self.dtc_score = accuracy_score(
@@ -158,8 +156,7 @@ class ModelFinder:
                 autolog("AUC Score for Decision Tree Classifier: {}".format(
                     self.dtc_score))
 
-            self.getBestparamsRandomForest()
-            self.prediction_rfc = self.rfc.predict_proba(self.X_test)
+            self.prediction_rfc = self.rfc.predict(self.X_test)
 
             if len(self.y_test) == 1:
                 self.rfc_score = accuracy_score(
