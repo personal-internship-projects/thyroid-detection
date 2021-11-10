@@ -13,7 +13,7 @@ else:
     log_path = f"{getcwd()}/scraper.log"
 
 format_var = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logging.basicConfig(filename=log_path, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
+logging.basicConfig(filename=log_path, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 console_log = logging.StreamHandler()
 console_log.setLevel(logging.INFO)
