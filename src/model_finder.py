@@ -4,8 +4,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, roc_auc_score
 import pandas as pd
+from sklearn.utils import safe_mask
 from src.logger.auto_logger import autolog
-
+from src.model_operations import saveModel
 
 class ModelFinder:
     def __init__(self, X_train, y_train, X_test, y_test):
@@ -48,6 +49,7 @@ class ModelFinder:
             autolog("Fitting the model with best parameters")
             self.dtc.fit(self.X_train, self.y_train)
             autolog("Model Fitted....")
+            saveModel(self.dtc, "DecisionTree")
 
         except Exception as e:
             autolog(
@@ -83,6 +85,7 @@ class ModelFinder:
             autolog("Fitting the model with best parameters")
             self.rfc.fit(self.X_train, self.y_train)
             autolog("Model Fitted....")
+            saveModel(self.rfc, "RandomForest")
 
         except Exception as e:
             autolog(
@@ -117,6 +120,7 @@ class ModelFinder:
             autolog("Fitting the model with best parameters")
             self.knn.fit(self.X_train, self.y_train)
             autolog("Model Fitted....")
+            saveModel(self.knn, "KNN")
 
         except Exception as e:
             autolog(
