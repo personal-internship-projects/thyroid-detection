@@ -102,7 +102,7 @@ class CassandraOperations:
             #client_secret = "jLDP1mfaC7ZNjZZMxcLniG14X-oQ0kBMJNU,95tkLtm5Nhmqaa8a8ztgmRXxtaq+MZhtLowgNns7KdH_g7cDy0xrb1WfADqNNf5c35BxYPWs47TZYgJtuWele1TtJT3s"
 
             auth_provider = PlainTextAuthProvider(
-                "zHTNaJwOaGDlFozNJEabKnoZ", "s4XthkziU7Av8QLU+YI_MHXYZIds_uR7tphlkkFe1XDB+r+k8DzmG8G+rqbPCXZ2_QLc,NtZEjYKnSHMeAz9C8W,WJ-MapEYZ,j9kufqSU_MYQGt8KP5K2lQPJp-w8Kx")
+                "NfXltKKtsdWDxIMclzaKqATk", "Efkr-1TJiluJG9TKc6LYKez+XfBwRuyFo_+69bdsjHuRs4Q8J+k-4,lzDY3ps4S,GMG2LZplh-8udw-wEUEEZs6F-_dD.KsISgXODtG.rtMa64H6Jd_pPyfWMqW_hngf")
             cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
 
             self.session = cluster.connect()
