@@ -82,7 +82,7 @@ pre.exportCsv(dfTransport, pre.preprocessedTrainCsv)
 autolog("Done.")
 
 print(numberOfClusters)
-from src import test as t
+from src import test 
 
 ## Training started
 
@@ -110,5 +110,6 @@ for id in clusterID:
     model.getBestparamsRandomForest()
     model.getBestparamsKNN()
     modelName, predModel = model.getBestModel()
-    saveModel(predModel, f"{pre.modelPath}/{modelName}_{id}.pkl")
+    saveModel(predModel, f"{pre.modelsDirs}/{modelName}_{id}.pkl")
+    autolog(f"Training completed for cluster {id}")
     
