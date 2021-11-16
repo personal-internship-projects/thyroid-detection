@@ -187,7 +187,7 @@ class Preprocessing():
 
 
     def resampleData(self,path,X,Y):
-        autolog("Resampling of data staryed")
+        autolog("Resampling of data started")
         rdsmple = RandomOverSampler(random_state=42)
         x_sampled,y_sampled  = rdsmple.fit_resample(X,Y)
         self.resampled_dataframe = pandas.DataFrame(data = x_sampled.join(y_sampled), columns = self.dataframe.columns, index=None)
@@ -202,7 +202,7 @@ class Preprocessing():
         return  read_csv(f"{path}/preprocessed_X.csv"), read_csv(f"{path}/preprocessed_Y.csv")
 
 
-    def quantileTransformer(self, data):
+    def LogTransformer(self, data):
         """
 
         Args:
@@ -211,9 +211,9 @@ class Preprocessing():
         Returns:
             [type]: [description]
         """
-        scaler = QuantileTransformer(output_distribution='normal')
-        data[['age','t3','tt4','t4u','fti']] = pandas.DataFrame(scaler.fit_transform(data[['age','t3','tt4','t4u','fti']]))
-        saveModel(f"{self.modelsDirs}/scaler.pkl", scaler)
+        columns = ['age','t3','tt4','t4u','fti']
+        for cols in columns:
+            data[cols] = numpy.log(1 + data[cols])
         print(data)
         return numpy.round(data, 4)
 
