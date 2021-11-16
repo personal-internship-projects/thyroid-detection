@@ -28,9 +28,9 @@ if (is_null_present):
 ## After resampling data, we are separating X, Y 
 ## for applying quantile transformer
 
-autolog("Applying Quantile Transformer...")
-X_test = pre.quantileTransformer(X_test)
-autolog("Quantile Transformer applied")
+autolog("Applying Logarithmic Transformer...")
+X_test= pre.LogTransformer(X_test)
+autolog("Log Transformer applied")
 
 try:
     K_Mean = loadModel("src/models/kmeans-clustering.pkl") 
