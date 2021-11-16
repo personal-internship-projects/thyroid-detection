@@ -1,6 +1,6 @@
 import pickle
 
-import sklearn
+
 from src.logger.auto_logger import autolog
 
 
@@ -18,7 +18,7 @@ def saveModel(path, model):
         autolog(f"Model saved to {path}.")
 
     except Exception as e:
-        autolog("An exception occured while saving model.", 3)
+        autolog(f"An exception occured while saving model.{e}", 3)
 
 
 def loadModel(path):
