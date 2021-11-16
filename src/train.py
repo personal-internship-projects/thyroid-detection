@@ -8,8 +8,9 @@ import src.database_operations as dboc
 from src.logger.auto_logger import autolog
 from src.model_operations import saveModel
 import src.preprocesing as prp
-from sklearn.model_selection import train_test_split
 from src import model_finder as mf
+import warnings
+warnings.filterwarnings("ignore")
 
 
 """x = fv.File_Type_Validation("./src/dataset")
@@ -48,25 +49,24 @@ if (isNullPresent):
 
 X_train, Y_train = pre.resampleData(pre.preprocessedTrainCsv, X_train, Y_train)
 
-## After resampling data, we are separating X, Y 
-## for applying quantile transformer
+# After resampling data, we are separating X, Y 
+# for applying logarithmic transformer
 
-autolog("Applying Quantile Transformer...")
-X_train = pre.quantileTransformer(X_train)
-autolog("Quantile Transformer applied")
+autolog("Applying Logarithmic Transformer...")
+X_train = pre.LogTransformer(X_train)
+autolog("Log Transformer applied")
 
 tmp_dataframe = X_train.join(Y_train)
 
-## After applying data transformation on numeric column 
-## this step will remove outliers from numeric columns
+# After applying data transformation on numeric column 
 
-pre.removeOutlier(tmp_dataframe)
 print(tmp_dataframe['class'].unique())
 
-## After removing outlier from whole dataset, we are separating X and Y again
-## This step is done for clustering
+# After doing all the steps above, we are separating X and Y again
+# This step is done for clustering
 
-X_train, Y_train = pre.seperateLabelfeature('class')
+X_train = tmp_dataframe.drop(columns = ["class"])
+Y_train = tmp_dataframe["class"]
 
 autolog("Clustering started.")
 K_Mean = Kmeansclustering() 
@@ -86,14 +86,13 @@ from src import test
 
 ## Training started
 
-autolog("Training started.")
 finalDataframeTrain = read_csv(f"{pre.preprocessedTrainCsv}/preprocessed.csv")
 finalDataframeTest = read_csv(f"{pre.preprocessedTestCsv}/preprocessed.csv")
 
 clusterID = finalDataframeTrain['Cluster'].unique()
 
 for id in clusterID:
-    
+    autolog(f"Training started for Cluster {id}.")
     ## Separating data based on cluster
     clusterDataTrain     = finalDataframeTrain[finalDataframeTrain['Cluster'] == id]
     clusterDataTest = finalDataframeTest[finalDataframeTest['Cluster'] == id]
@@ -110,6 +109,6 @@ for id in clusterID:
     model.getBestparamsRandomForest()
     model.getBestparamsKNN()
     modelName, predModel = model.getBestModel()
-    saveModel(predModel, f"{pre.modelsDirs}/{modelName}_{id}.pkl")
-    autolog(f"Training completed for cluster {id}")
+    saveModel(f"{pre.modelsDirs}/{modelName}_{id}.pkl", predModel)
+    autolog(f"Training for cluster {id} completed successfully")
     
