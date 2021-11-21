@@ -1,8 +1,8 @@
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV,StratifiedKFold
+from sklearn.metrics import accuracy_score,roc_auc_score,make_scorer
 import pandas as pd
 from sklearn.utils import safe_mask
 from src.logger.auto_logger import autolog
@@ -20,6 +20,8 @@ class ModelFinder:
         self.dtc = DecisionTreeClassifier()
         self.rfc = RandomForestClassifier()
         self.knn = KNeighborsClassifier()
+        self.cv = StratifiedKFold(n_splits=5,shuffle=True,random_state=100)
+        self.scoring = make_scorer(roc_auc_score, needs_proba=True, multi_class="ovr")
 
     def getBestparamsDecisionTree(self):
         
@@ -33,7 +35,7 @@ class ModelFinder:
 
             autolog("Initializing GridSearchCV")
             self.grid = GridSearchCV(
-                self.dtc, self.params_dtc, cv=5, verbose=True)
+                self.dtc, self.params_dtc, cv=self.cv,scoring=self.scoring, verbose=True)
 
             autolog("Finding best parameters for Decision Tree Classifier")
             self.grid.fit(self.X_train, self.y_train)
@@ -68,7 +70,7 @@ class ModelFinder:
 
             autolog("Initializing GridSearchCV")
             self.grid = GridSearchCV(
-                self.rfc, self.params_rfc, cv=5, verbose=True)
+                self.rfc, self.params_rfc, cv=self.cv,scoring=self.scoring, verbose=True)
 
             autolog("Finding best parameters for Random Forest Classifier")
             self.grid.fit(self.X_train, self.y_train)
@@ -103,7 +105,7 @@ class ModelFinder:
 
             autolog("Initializing GridSearchCV")
             self.grid = GridSearchCV(
-                self.knn, self.params_knn, cv=5, verbose=True)
+                self.knn, self.params_knn, cv=self.cv,scoring=self.scoring, verbose=True)
 
             autolog("Finding best parameters for KNN Classifier")
             self.grid.fit(self.X_train, self.y_train)
@@ -130,28 +132,53 @@ class ModelFinder:
         autolog("Finding best model")
 
         try:
-            self.prediction_knn = self.knn.predict(self.X_test)
-            self.knn_score = accuracy_score(
+
+            if len(self.y_test) == 1:
+                self.prediction_knn = self.knn.predict(self.X_test)
+                self.knn_score = accuracy_score(
                     self.y_test, self.prediction_knn)
-            autolog("Training Accuracy of KNN Classifier: {}".format(self.knn.score(self.X_train, self.y_train)))
-            autolog("Accuracy Score for KNN Classifier: {}".format(
+                autolog("Training Accuracy of KNN Classifier: {}".format(self.knn.score(self.X_train, self.y_train)))
+                autolog("Accuracy Score for KNN Classifier: {}".format(
                     self.knn_score))
-            
+            else:
+                self.prediction_knn = self.knn.predict_proba(self.X_test)
+                self.knn_score = roc_auc_score(
+                    self.y_test, self.prediction_knn, multi_class='ovr')
+                autolog("Training Accuracy of KNN Classifier: {}".format(self.knn.score(self.X_train, self.y_train)))
+                autolog("AUC Score for KNN Classifier: {}".format(
+                    self.knn_score))
 
-            self.prediction_dtc = self.dtc.predict(self.X_test)
-            self.dtc_score = accuracy_score(
+
+            if len(self.y_test) == 1:
+                self.prediction_dtc = self.dtc.predict(self.X_test)
+                self.dtc_score = accuracy_score(
                     self.y_test, self.prediction_dtc)
-            autolog("Training Accuracy of Decision Tree Classifier: {}".format(self.dtc.score(self.X_train, self.y_train)))
-            autolog("Accuracy Score for Decision Tree Classifier: {}".format(
+                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.dtc.score(self.X_train, self.y_train)))
+                autolog("Accuracy Score for Decision Tree Classifier: {}".format(
                     self.dtc_score))
-            
+            else:
+                self.prediction_dtc = self.dtc.predict_proba(self.X_test)
+                self.dtc_score = roc_auc_score(
+                    self.y_test, self.prediction_dtc, multi_class='ovr')
+                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.dtc.score(self.X_train, self.y_train)))
+                autolog("AUC Score for Decision Tree Classifier: {}".format(
+                    self.dtc_score))
 
-            self.prediction_rfc = self.rfc.predict(self.X_test)
-            self.rfc_score = accuracy_score(self.y_test, self.prediction_rfc)
-            autolog("Training Accuracy of Random Forest Classifier: {}".format(self.rfc.score(self.X_train, self.y_train)))        
-            autolog("Accuracy Score for Random Forest Classifier: {}".format(
+
+            if len(self.y_test) == 1:
+                self.prediction_rfc = self.rfc.predict(self.X_test)
+                self.rfc_score = accuracy_score(
+                    self.y_test, self.rfc.predict(self.X_test))
+                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.rfc.score(self.X_train, self.y_train)))
+                autolog("Accuracy Score for Random Forest Classifier: {}".format(
                     self.rfc_score))
-            
+            else:
+                self.prediction_rfc = self.rfc.predict_proba(self.X_test)
+                self.rfc_score = roc_auc_score(
+                    self.y_test, self.prediction_rfc, multi_class='ovr')
+                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.rfc.score(self.X_train, self.y_train)))
+                autolog("AUC Score for Random Forest Classifier: {}".format(
+                    self.rfc_score))
 
             autolog("Comparing the models")
             if self.knn_score > self.dtc_score and self.knn_score > self.rfc_score:
@@ -160,7 +187,8 @@ class ModelFinder:
             elif self.dtc_score > self.knn_score and self.dtc_score > self.rfc_score:
                 autolog("Decision Tree Classifier is the best model")
                 return "DecisionTreeClassifier", self.dtc
-            else:
+            else: 
+                self.rfc_score > self.knn_score and self.rfc_score > self.dtc_score
                 autolog("Random Forest Classifier is the best model")
                 return "RandomForestClassifier", self.rfc
         except Exception as e:
