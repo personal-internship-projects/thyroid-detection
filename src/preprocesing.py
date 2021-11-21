@@ -16,15 +16,17 @@ from src.model_operations import loadModel, saveModel
 class Preprocessing():
     
     def __init__(self):
-        self.trainCsv               = "src/dataset/combined_csv/train/combined.csv"
-        self.testCsv                = "src/dataset/combined_csv/test/combined.csv"
-        self.predictCsv             = "src/dataset/combined_csv/predict/combined.csv"
+        self.trainCsv                      = "src/dataset/combined_csv/train/combined.csv"
+        self.testCsv                       = "src/dataset/combined_csv/test/combined.csv"
+        self.predictCsv                    = "src/dataset/combined_csv/predict/combined.csv"
 
-        self.preprocessedTrainCsv   = "src/dataset/preprocessed/train"
-        self.preprocessedTestCsv    = "src/dataset/preprocessed/test"
-        self.preprocessedPredictCsv = "src/dataset/preprocessed/predict"
-        self.preprocessedNullCsv    = "src/dataset/preprocessed"
-        self.modelsDirs             = "src/models"
+        self.preprocessedTrainCsv          = "src/dataset/preprocessed/train"
+        self.preprocessedTestCsv           = "src/dataset/preprocessed/test"
+        self.preprocessedPredictCsv        = "src/dataset/preprocessed/predict"
+        self.preprocessedNullCsvTrain      = "src/dataset/preprocessed/train"
+        self.preprocessedNullCsvTest       = "src/dataset/preprocessed/test"
+        self.preprocessedNullCsvPredict    = "src/dataset/preprocessed/predict"
+        self.modelsDirs                    = "src/models"
 
 
     def createPreprocessedDirectory(self):
