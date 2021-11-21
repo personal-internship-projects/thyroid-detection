@@ -4,6 +4,7 @@ from sklearn import cluster
 import src.File_Type_Validation as fv
 import src.Data_Validation as dv
 from src.clustering import Kmeansclustering
+from sklearn.model_selection import train_test_split
 import src.database_operations as dboc
 from src.logger.auto_logger import autolog
 from src.model_operations import saveModel
@@ -41,7 +42,7 @@ pre.readCsv(pre.trainCsv)
 pre.dropUnnecessaryColumns()
 pre.replaceWithNan()
 pre.encodingCategoricalColumnsTraining()
-isNullPresent = pre.isnullPresent(pre.dataframe,pre.preprocessedNullCsv)
+isNullPresent = pre.isnullPresent(pre.dataframe,pre.preprocessedNullCsvTrain)
 
 X_train, Y_train = pre.seperateLabelfeature('class')
 if (isNullPresent):
@@ -95,16 +96,17 @@ for id in clusterID:
     autolog(f"Training started for Cluster {id}.")
     ## Separating data based on cluster
     clusterDataTrain     = finalDataframeTrain[finalDataframeTrain['Cluster'] == id]
-    clusterDataTest = finalDataframeTest[finalDataframeTest['Cluster'] == id]
+    #clusterDataTest = finalDataframeTest[finalDataframeTest['Cluster'] == id]
     
-    ## Prepare the feature and Label columns
-    clusterFeatureTrain = clusterDataTrain.drop(['class', 'Cluster'], axis=1)
-    clusterLabelTrain = clusterDataTrain['class']
+    # ## Prepare the feature and Label columns
+    x = clusterDataTrain.drop(['class', 'Cluster'], axis=1)
+    y = clusterDataTrain['class']
 
-    clusterFeatureTest = clusterDataTest.drop(['class', 'Cluster'], axis=1)
-    clusterLabelTest = clusterDataTest['class']
-
-    model = mf.ModelFinder(clusterFeatureTrain, clusterLabelTrain, clusterFeatureTest, clusterLabelTest)
+    # clusterFeatureTest = clusterDataTest.drop(['class', 'Cluster'], axis=1)
+    # clusterLabelTest = clusterDataTest['class']
+    x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,stratify=y,random_state=42)
+    
+    model = mf.ModelFinder(x_train,y_train,x_test,y_test)
     model.getBestparamsDecisionTree()
     model.getBestparamsRandomForest()
     model.getBestparamsKNN()
