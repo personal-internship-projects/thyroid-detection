@@ -18,7 +18,7 @@ pre.readCsv(pre.testCsv)
 pre.dropUnnecessaryColumns()
 pre.replaceWithNan()
 pre.encodingCategoricalColumnsTraining()
-is_null_present = pre.isnullPresent(pre.dataframe, pre.preprocessedNullCsv)
+is_null_present = pre.isnullPresent(pre.dataframe, pre.preprocessedNullCsvTest)
 
 X_test, Y_test = pre.seperateLabelfeature('class')
 
