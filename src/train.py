@@ -83,7 +83,7 @@ pre.exportCsv(dfTransport, pre.preprocessedTrainCsv)
 autolog("Done.")
 
 print(numberOfClusters)
-from src import test as t
+from src import test 
 
 ## Training started
 
