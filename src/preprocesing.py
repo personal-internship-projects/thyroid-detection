@@ -27,6 +27,7 @@ class Preprocessing():
         self.preprocessedNullCsvTest       = "src/dataset/preprocessed/test"
         self.preprocessedNullCsvPredict    = "src/dataset/preprocessed/predict"
         self.modelsDirs                    = "src/models"
+        self.predModelDirs                 = "src/pred_models" 
 
 
     def createPreprocessedDirectory(self):
