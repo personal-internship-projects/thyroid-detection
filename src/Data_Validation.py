@@ -179,6 +179,34 @@ class DataValidation:
                 data.to_csv(f"{mainDir}/{files}", index=None, header=True)
 
                 autolog(f"added quotes {files}.csv completed. ")
+                
+    def addQuotesToStringPredict(self, dict):
+        """This function is used to add quotes to the string
+
+        Args:
+            dict ([dictionary]): [contains the dictionary of the schema file]
+        """
+        autolog("Adding quotes to strings in dataset started...")
+        for x in os.listdir(self.finalCsvPredict):
+            #mainDir = f"{self.finalCsvPredict}/{x}"
+            #for files in os.listdir(x):
+            data = read_csv(f"{self.finalCsvPredict}/{x}")
+            data.iloc[:, -1] = data.iloc[:, -
+                                            1].apply(lambda x: re.match(r'([^.|]*)', x).group(1))
+
+            column = [x for x in dict["ColName"]
+                        if dict["ColName"][x] == "varchar"]
+
+            for col in data.columns:
+                if col in column:
+                    data[col] = data[col].apply(lambda x: f"'{str(x)}'")
+                elif col not in column:
+                    data[col] = data[col].replace('?', "null")
+
+            os.remove(f"{self.finalCsvPredict}/{x}")
+            data.to_csv(f"{self.finalCsvPredict}/{x}", index=None, header=True)
+
+            autolog(f"added quotes {x}.csv completed. ")
 
 
 if __name__ == '__main__':
