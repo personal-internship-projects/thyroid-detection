@@ -83,7 +83,6 @@ pre.exportCsv(dfTransport, pre.preprocessedTrainCsv)
 autolog("Done.")
 
 print(numberOfClusters)
-from src import test 
 
 ## Training started
 
@@ -96,14 +95,12 @@ for id in clusterID:
     autolog(f"Training started for Cluster {id}.")
     ## Separating data based on cluster
     clusterDataTrain     = finalDataframeTrain[finalDataframeTrain['Cluster'] == id]
-    #clusterDataTest = finalDataframeTest[finalDataframeTest['Cluster'] == id]
     
-    # ## Prepare the feature and Label columns
+    ## Prepare the feature and Label columns
     x = clusterDataTrain.drop(['class', 'Cluster'], axis=1)
     y = clusterDataTrain['class']
 
-    # clusterFeatureTest = clusterDataTest.drop(['class', 'Cluster'], axis=1)
-    # clusterLabelTest = clusterDataTest['class']
+    ## Splitting the data into training and testing data
     x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,stratify=y,random_state=42)
     
     model = mf.ModelFinder(x_train,y_train,x_test,y_test)
@@ -112,5 +109,6 @@ for id in clusterID:
     model.getBestparamsKNN()
     modelName, predModel = model.getBestModel()
     saveModel(f"{pre.modelsDirs}/{modelName}_{id}.pkl", predModel)
+    saveModel(f"{pre.predModelDirs}/{id}.pkl", predModel)
     autolog(f"Training for cluster {id} completed successfully")
     
