@@ -35,7 +35,7 @@ class ModelFinder:
 
             autolog("Initializing GridSearchCV")
             self.grid = GridSearchCV(
-                self.dtc, self.params_dtc, cv=self.cv,scoring=self.scoring, verbose=True)
+                self.dtc, self.params_dtc, cv=self.cv,scoring=self.scoring, verbose=3)
 
             autolog("Finding best parameters for Decision Tree Classifier")
             self.grid.fit(self.X_train, self.y_train)
@@ -70,7 +70,7 @@ class ModelFinder:
 
             autolog("Initializing GridSearchCV")
             self.grid = GridSearchCV(
-                self.rfc, self.params_rfc, cv=self.cv,scoring=self.scoring, verbose=True)
+                self.rfc, self.params_rfc, cv=self.cv,scoring=self.scoring, verbose=3)
 
             autolog("Finding best parameters for Random Forest Classifier")
             self.grid.fit(self.X_train, self.y_train)
@@ -105,7 +105,7 @@ class ModelFinder:
 
             autolog("Initializing GridSearchCV")
             self.grid = GridSearchCV(
-                self.knn, self.params_knn, cv=self.cv,scoring=self.scoring, verbose=True)
+                self.knn, self.params_knn, cv=self.cv,scoring=self.scoring, verbose=3)
 
             autolog("Finding best parameters for KNN Classifier")
             self.grid.fit(self.X_train, self.y_train)
