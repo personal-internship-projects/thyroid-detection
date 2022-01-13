@@ -82,8 +82,6 @@ class MLoperations:
 
         numberOfClusters = K_Mean.elbowplot(X_train)
 
-        K_Mean.silhoutee_scores(X_train)
-        K_Mean.scores_clustering()
         
         X_train_clusters = K_Mean.create_clusters(X_train, numberOfClusters)
         autolog(f"number of clusters are: {numberOfClusters}")
