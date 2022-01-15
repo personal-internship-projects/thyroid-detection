@@ -117,7 +117,7 @@ class Preprocessing():
             dataframe = pandas.DataFrame()
             dataframe['columns'] = data.columns
             dataframe["missing values count"] = numpy.asarray(data.isna().sum())
-        dataframe.to_csv(f"{path}/null.csv")
+            dataframe.to_csv(f"{path}/null.csv")
         autolog("Checking for null values completed...")
         return self.null_present
 
