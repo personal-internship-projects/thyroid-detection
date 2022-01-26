@@ -3,7 +3,7 @@ from pandas import read_csv,get_dummies
 from numpy import nan
 import pandas
 import pickle
-from sklearn.preprocessing import LabelEncoder, QuantileTransformer
+from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import KNNImputer
 from imblearn.over_sampling import RandomOverSampler
 from src.logger.auto_logger import autolog

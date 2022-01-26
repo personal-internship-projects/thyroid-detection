@@ -22,7 +22,7 @@ class MLoperations:
     
     def train_model(self):
         
-        ''' x = fv.File_Type_Validation("./src/dataset")
+        x = fv.File_Type_Validation("./src/dataset")
         x.createCsvDir()
         x.convertToCsv()
         zz =dv.DataValidation()
@@ -37,10 +37,11 @@ class MLoperations:
         db = dboc.CassandraOperations()
         db.databaseConnection()
         db.createPreprocessedCsvDirectory(db.combinedTrain)
-        db.deleteTable('train')
-        db.createTable('train', db.schemaPath)
+        #db.deleteTable('train')
+        #db.createTable('train', db.schemaPath)
         db.insertValidatedData(db.finalCsvTrain, "train", db.schemaPath)
-        db.fetch(db.combinedTrain, "train",  db.schemaPath)'''
+        db.fetch(db.combinedTrain, "train",  db.schemaPath)
+        db.truncatetable('train')
 
 
         pre = prp.Preprocessing()
@@ -127,10 +128,14 @@ class MLoperations:
         db = dboc.CassandraOperations()
         db.databaseConnection()
         db.createPreprocessedCsvDirectory(db.combinedTest)
-        db.deleteTable("test")
-        db.createTable('test',db.schemaPath)
+        #db.deleteTable("test")
+        #db.createTable('test',db.schemaPath)
         db.insertValidatedData(db.finalCsvTest, "test", db.schemaPath)
-        db.fetch(db.combinedTest,'test', db.schemaPath)
+        try:
+            db.fetch(db.combinedTest,'test', db.schemaPath)
+        except Exception as e:
+            print(e)
+        db.truncatetable('test')
 
         pre = prp.Preprocessing()
         pre.createPreprocessedDirectory()
@@ -166,6 +171,7 @@ class MLoperations:
         # testing started
         autolog("Prediction started")
         clusterID = finalDataframeTest['Cluster'].unique()
+        print(clusterID)
 
         for id in clusterID:
             autolog(f"Training started for Cluster {id}.")
@@ -203,10 +209,11 @@ class MLoperations:
         """db = dboc.CassandraOperations()
         db.databaseConnection()
         db.createPreprocessedCsvDirectory(db.combinedPredict)
-        db.deleteTable('predict')
+        #db.deleteTable('predict')
         db.createTable('predict', db.schemaPathPredict)
         db.insertValidatedData(db.finalCsvPredict, "predict", db.schemaPathPredict)
-        db.fetch(db.combinedPredict, "predict", db.schemaPathPredict)"""
+        db.fetch(db.combinedPredict, "predict", db.schemaPathPredict)
+        db.truncatetable('predict')"""
 
         pre = prp.Preprocessing()
         pre.createPreprocessedDirectory()

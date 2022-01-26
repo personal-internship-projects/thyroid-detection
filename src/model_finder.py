@@ -133,52 +133,34 @@ class ModelFinder:
 
         try:
 
-            if len(self.y_test) == 1:
-                self.prediction_knn = self.knn.predict(self.X_test)
-                self.knn_score = accuracy_score(
-                    self.y_test, self.prediction_knn)
-                autolog("Training Accuracy of KNN Classifier: {}".format(self.knn.score(self.X_train, self.y_train)))
-                autolog("Accuracy Score for KNN Classifier: {}".format(
-                    self.knn_score))
-            else:
-                self.prediction_knn = self.knn.predict_proba(self.X_test)
-                self.knn_score = roc_auc_score(
-                    self.y_test, self.prediction_knn, multi_class='ovr')
-                autolog("Training Accuracy of KNN Classifier: {}".format(self.knn.score(self.X_train, self.y_train)))
-                autolog("AUC Score for KNN Classifier: {}".format(
-                    self.knn_score))
+            
+            self.prediction_knn = self.knn.predict(self.X_test)
+            self.knn_score = accuracy_score(
+                self.y_test, self.prediction_knn)
+            autolog("Training Accuracy of KNN Classifier: {}".format(self.knn.score(self.X_train, self.y_train)))
+            autolog("Accuracy Score for KNN Classifier: {}".format(
+                self.knn_score))
+            
 
 
-            if len(self.y_test) == 1:
-                self.prediction_dtc = self.dtc.predict(self.X_test)
-                self.dtc_score = accuracy_score(
-                    self.y_test, self.prediction_dtc)
-                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.dtc.score(self.X_train, self.y_train)))
-                autolog("Accuracy Score for Decision Tree Classifier: {}".format(
-                    self.dtc_score))
-            else:
-                self.prediction_dtc = self.dtc.predict_proba(self.X_test)
-                self.dtc_score = roc_auc_score(
-                    self.y_test, self.prediction_dtc, multi_class='ovr')
-                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.dtc.score(self.X_train, self.y_train)))
-                autolog("AUC Score for Decision Tree Classifier: {}".format(
-                    self.dtc_score))
+            
+            self.prediction_dtc = self.dtc.predict(self.X_test)
+            self.dtc_score = accuracy_score(
+                self.y_test, self.prediction_dtc)
+            autolog("Training Accuracy of Random Forest Classifier: {}".format(self.dtc.score(self.X_train, self.y_train)))
+            autolog("Accuracy Score for Decision Tree Classifier: {}".format(
+                self.dtc_score))
+            
 
 
-            if len(self.y_test) == 1:
-                self.prediction_rfc = self.rfc.predict(self.X_test)
-                self.rfc_score = accuracy_score(
-                    self.y_test, self.rfc.predict(self.X_test))
-                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.rfc.score(self.X_train, self.y_train)))
-                autolog("Accuracy Score for Random Forest Classifier: {}".format(
-                    self.rfc_score))
-            else:
-                self.prediction_rfc = self.rfc.predict_proba(self.X_test)
-                self.rfc_score = roc_auc_score(
-                    self.y_test, self.prediction_rfc, multi_class='ovr')
-                autolog("Training Accuracy of Random Forest Classifier: {}".format(self.rfc.score(self.X_train, self.y_train)))
-                autolog("AUC Score for Random Forest Classifier: {}".format(
-                    self.rfc_score))
+            
+            self.prediction_rfc = self.rfc.predict(self.X_test)
+            self.rfc_score = accuracy_score(
+                self.y_test, self.rfc.predict(self.X_test))
+            autolog("Training Accuracy of Random Forest Classifier: {}".format(self.rfc.score(self.X_train, self.y_train)))
+            autolog("Accuracy Score for Random Forest Classifier: {}".format(
+                self.rfc_score))
+            
 
             autolog("Comparing the models")
             if self.knn_score > self.dtc_score and self.knn_score > self.rfc_score:
