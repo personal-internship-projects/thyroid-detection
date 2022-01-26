@@ -149,6 +149,20 @@ class CassandraOperations:
                     autolog(f"TABLE {table_name} created.")
                 except:
                     autolog(f"Failed to create table {table_name}")
+    
+    def truncatetable(self, table_name):
+        """
+        This function truncates the table in the database.
+
+        Args:
+            table_name : [Table name to be truncated]
+        """
+        try:
+            self.session.execute(
+                f"TRUNCATE TABLE {self.keyspace_name}.{table_name}")
+            autolog(f"Truncated {table_name} successfully")
+        except:
+            autolog(f"Failed to truncate table {table_name}")
 
     def columnNameRetriever(self, schemaPath) -> list():
         """
@@ -211,9 +225,9 @@ class CassandraOperations:
                         print(BATCH_STMT)
                         batch_size = 0
             autolog(f"Inserted data successfully into database.")
-            self.deleteCsv()
+            #self.deleteCsv()
         except Exception as e:
-            autolog("Failed to insert data", 3)
+            autolog(f"Failed to insert data: {e}", 3)
 
     def pandas_factory(self, colnames, rows):
         """
