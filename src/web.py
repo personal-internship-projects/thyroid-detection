@@ -53,9 +53,9 @@ def predict():
             data.save("src/dataset/csv_operation/PredictCSV/datasetpredict.csv")
             # convert the dictionary to a string
             mlops.prediction()
-            code, msg = upload_data("datasetpredict")
-            shutil.rmtree("src/dataset/csv_operation/PredictCSV")
-            return msg
+            link = upload_data("predict")
+            #shutil.rmtree("src/dataset/csv_operation/PredictCSV")
+            return f"<h1> Completed successfuly </h1> <br> <a href='{link}'> Download link below </a>"
            
 
 
