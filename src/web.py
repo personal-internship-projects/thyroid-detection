@@ -20,7 +20,7 @@ def start_test():
     mlops.test_model()
     link = upload_data("test")
     print(link)
-    return f"<h1> Completed successfuly </h1> <br> <a href='{link}'> Download link below </a>"
+    return f"<h1> Completed successfuly </h1> <br> <a href='{link}'> Download link below </a><br> <a href='/'> Go back to home page </a>"
 
 def upload_data(operation):
 
@@ -28,21 +28,22 @@ def upload_data(operation):
     global count
     url = "https://api.anonfiles.com/upload"
     header = {'Content-type': 'application/octet-stream'}
-    files = {
-        'file':(f"src/dataset/preprocessed/{operation}/preprocessed.csv", open(f"src/dataset/preprocessed/{operation}/preprocessed.csv", "rb"))
-    }
-    try:
-        tmp = requests.post('https://api.anonfiles.com/upload', files=files)
-        tmp = tmp.json()
-        autolog(f"tmp: {tmp}")
-        url = tmp["data"]["file"]["url"]["full"]
-        autolog("Uploaded data successfully")
-        return url
-    except Exception as e:
-        autolog(f"Failed to upload data: {e}")
-        return 1, "Failed to upload data"
-    finally:
-        autolog("closed file")        
+    with open(f"src/dataset/preprocessed/{operation}/preprocessed.csv", "rb") as f:
+        files = {
+            'file':(f"src/dataset/preprocessed/{operation}/preprocessed.csv", f)
+        }
+        try:
+            tmp = requests.post('https://api.anonfiles.com/upload', files=files)
+            tmp = tmp.json()
+            autolog(f"tmp: {tmp}")
+            url = tmp["data"]["file"]["url"]["full"]
+            autolog("Uploaded data successfully")
+            return url
+        except Exception as e:
+            autolog(f"Failed to upload data: {e}")
+            return 1, "Failed to upload data"
+        finally:
+            autolog("closed file")        
 
 
 @app.route('/predict', methods=["POST"])
@@ -54,8 +55,9 @@ def predict():
             # convert the dictionary to a string
             mlops.prediction()
             link = upload_data("predict")
+            
             #shutil.rmtree("src/dataset/csv_operation/PredictCSV")
-            return f"<h1> Completed successfuly </h1> <br> <a href='{link}'> Download link below </a>"
+            return f"<h1> Completed successfuly </h1> <br> <a href='{link}'> Download link below </a><br> <a href='/'> Go back to home page </a>"
            
 
 

@@ -206,14 +206,14 @@ class MLoperations:
         f = zz.addQuotesToStringPredict(dic)
 
 
-        """db = dboc.CassandraOperations()
+        db = dboc.CassandraOperations()
         db.databaseConnection()
         db.createPreprocessedCsvDirectory(db.combinedPredict)
         #db.deleteTable('predict')
-        db.createTable('predict', db.schemaPathPredict)
+        #db.createTable('predict', db.schemaPathPredict)
         db.insertValidatedData(db.finalCsvPredict, "predict", db.schemaPathPredict)
         db.fetch(db.combinedPredict, "predict", db.schemaPathPredict)
-        db.truncatetable('predict')"""
+        db.truncatetable('predict')
 
         pre = prp.Preprocessing()
         pre.createPreprocessedDirectory()
