@@ -18,15 +18,18 @@ def home_page():
 @app.route('/test', methods=["POST"])
 def start_test():
     mlops.test_model()
+    link = upload_data("test")
+    print(link)
+    return f"<h1> Completed successfuly </h1> <br> <a href='{link}'> Download link below </a>"
 
-def upload_data(data):
+def upload_data(operation):
 
     autolog("inside upload_data function")
     global count
     url = "https://api.anonfiles.com/upload"
     header = {'Content-type': 'application/octet-stream'}
     files = {
-        'file':("src/dataset/preprocessed/predict/preprocessed.csv", open("src/dataset/preprocessed/predict/preprocessed.csv", "rb"))
+        'file':(f"src/dataset/preprocessed/{operation}/preprocessed.csv", open(f"src/dataset/preprocessed/{operation}/preprocessed.csv", "rb"))
     }
     try:
         tmp = requests.post('https://api.anonfiles.com/upload', files=files)
@@ -34,7 +37,7 @@ def upload_data(data):
         autolog(f"tmp: {tmp}")
         url = tmp["data"]["file"]["url"]["full"]
         autolog("Uploaded data successfully")
-        return 0, f"Uploaded data successfully. <a href={url}>Download link</a>"
+        return url
     except Exception as e:
         autolog(f"Failed to upload data: {e}")
         return 1, "Failed to upload data"
